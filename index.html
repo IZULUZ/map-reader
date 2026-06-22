@@ -55,13 +55,22 @@
         .building-cell { position: relative; background-size: cover; }
         .tollgate-cell { background-color: #ffcccc; border: 2px dashed red; } 
         
-        /* 맵 라벨 스타일 */
         .map-label { position:absolute; bottom:2px; font-size:0.5rem; color:black; font-family:'Fredoka One'; background:rgba(255,255,255,0.8); padding:1px 3px; border-radius:3px; letter-spacing:0.5px; }
 
         .char-wrapper { position: absolute; width: 55px; height: 55px; z-index: 10; transition: transform 0.3s ease-in-out; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; }
         .char-sprite { width: 40px; height: 40px; object-fit: contain; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
         .char-name-tag { position: absolute; bottom: -8px; background: rgba(0,0,0,0.8); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; white-space: nowrap; }
         
+        /* 잘못된 경로 이동 시 빨갛게 흔들리는 애니메이션 */
+        @keyframes shakeError {
+            0% { transform: translateX(0); filter: drop-shadow(0 0 10px red); }
+            25% { transform: translateX(-5px); filter: drop-shadow(0 0 15px red) sepia(1) hue-rotate(-50deg) saturate(5); }
+            50% { transform: translateX(5px); filter: drop-shadow(0 0 15px red) sepia(1) hue-rotate(-50deg) saturate(5); }
+            75% { transform: translateX(-5px); filter: drop-shadow(0 0 10px red); }
+            100% { transform: translateX(0); filter: none; }
+        }
+        .shake-error { animation: shakeError 0.4s ease-in-out; }
+
         .walkie-talkie { background: #e0f7fa; border: 4px solid #006064; border-radius: 10px; padding: 10px; width: 100%; box-sizing: border-box; color: black; margin-bottom: 10px;}
         .walkie-title { font-family: 'Fredoka One'; color: #006064; margin: 0 0 5px 0; font-size: 1rem; display: flex; justify-content: space-between; align-items: center;}
         
@@ -91,7 +100,6 @@
 
     <h1>Map Reader</h1>
 
-    <!-- 1. Intro Screen -->
     <div id="intro-screen" class="screen active">
         <h2 style="color:var(--btn-forward)">Enter Your Nickname</h2>
         <input type="text" id="nickname-input" placeholder="Your Name" maxlength="10">
@@ -111,7 +119,6 @@
         </div>
     </div>
 
-    <!-- 2. Lobby Screen -->
     <div id="lobby-screen" class="screen">
         <h2>Welcome, <span id="display-name" style="color: yellow;"></span>!</h2>
         <div style="display: flex; gap: 20px; margin-top: 30px; align-items: center;">
@@ -124,7 +131,6 @@
         </div>
     </div>
 
-    <!-- 3. Room Screen -->
     <div id="room-screen" class="screen">
         <h2>Room Code: <span id="room-code-display" style="color:#39ff14; font-size: 3rem;"></span></h2>
         <p>Drag your character card to pick a team!</p>
@@ -139,7 +145,6 @@
         </div>
     </div>
 
-    <!-- 4. Game Screen -->
     <div id="game-screen" class="screen">
         <div class="game-header">
             <span id="round-info">Round 1/4</span>
@@ -161,7 +166,6 @@
                 
                 <div class="chat-history" id="chat-display"></div>
                 
-                <!-- Explorer Chat Form (First Ask) -->
                 <div id="explorer-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-q-1">
                         <option value="How can I get to">How can I get to</option>
@@ -176,7 +180,6 @@
                     <button class="btn-cyan" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieQuestion()">SEND</button>
                 </div>
 
-                <!-- Guide Direction Form -->
                 <div id="guide-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-a-1">
                         <option value="Go straight">Go straight</option>
@@ -191,7 +194,6 @@
                     <button class="btn-yellow" id="guide-send-btn" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieAnswer()">SEND</button>
                 </div>
 
-                <!-- Guide Arrival Signal Form -->
                 <div id="guide-arrival-form" style="display: none; margin-top: 5px;" class="walkie-inputs">
                     <select id="chat-arrival">
                         <option value="It's on your left.">It's on your left.</option>
@@ -212,7 +214,6 @@
                 </div>
             </div>
 
-            <!-- Explorer Controls -->
             <div id="explorer-controls" style="display: none; width: 100%;">
                 <div class="controls">
                     <button id="btn-fwd" style="background: var(--btn-forward)" onclick="moveChar('forward')" disabled>⬆️ Forward</button>
@@ -220,15 +221,13 @@
                     <button id="btn-left" style="background: var(--btn-left)" onclick="moveChar('left')">↩️ Turn Left</button>
                     <button id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')">↪️ Turn Right</button>
                 </div>
-                <!-- Move Complete Button -->
+                
                 <button class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 10px; display: none;" onclick="sendMoveComplete()">✅ Move Complete (Ask for next direction)</button>
-                <!-- Check Location Button -->
-                <button class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 10px;">🚩 LOCATION CHECK (Finish Round)</button>
+                <button class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 10px; display: none;">🚩 LOCATION CHECK (Finish Round)</button>
             </div>
         </div>
     </div>
 
-    <!-- Tollgate Modal -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2>👮 Police Checkpoint</h2>
@@ -238,7 +237,6 @@
         </div>
     </div>
 
-    <!-- 5. Lounge Screen -->
     <div id="lounge-screen" class="screen">
         <h2 id="lounge-title" style="color: #39ff14; font-size: 3rem;">Round Cleared!</h2>
         <div class="result-box">
@@ -249,33 +247,27 @@
         <button class="btn-cyan" id="lounge-next-btn" style="display: none; margin-top: 20px; font-size: 1.5rem;">START NEXT ROUND</button>
     </div>
 
-    <!-- 6. Ending Screen -->
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">SUCCESS!</h2>
         <div id="ending-results" class="result-box"></div>
         <button class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
-    <!-- How to Play Modal -->
     <div id="howto-modal" class="modal">
         <div class="modal-box">
             <h2 style="color: #00f0ff; margin-top: 0; text-shadow: 2px 2px black;">❓ HOW TO PLAY</h2>
-            
             <div class="howto-section">
                 <h3 style="margin: 0; color: #ff007f;">1. Explorer (탐험가)</h3>
                 <p style="font-size: 1rem; margin: 5px 0;">주어진 'Situation(상황)'을 보고 목적지를 파악하세요! 무전기로 가이드에게 <b>먼저 길을 물어봐야 합니다.</b> <br>이동이 끝나면 <b>[Move Complete]</b>를 눌러 다음 길을 요구하고, 도착 신호를 받으면 <b>[LOCATION CHECK]</b>를 누르세요.</p>
             </div>
-
             <div class="howto-section">
                 <h3 style="margin: 0; color: #006064;">2. Guide (가이드)</h3>
                 <p style="font-size: 1rem; margin: 5px 0;">지도가 보이지만 <b>정답 목적지를 모릅니다.</b> 탐험가의 질문을 듣고 길을 안내하세요. 목적지에 도착한 것이 보이면 <b>[📢 Signal Arrival]</b> 버튼으로 도착 신호를 줘야 합니다.</p>
             </div>
-
             <div class="howto-section">
                 <h3 style="margin: 0; color: red;">👮 Police Checkpoint</h3>
                 <p style="font-size: 1rem; margin: 5px 0;">맵 중앙 검문소에서는 <b>가이드 화면에만 암호가 뜹니다.</b> 가이드는 암호를 읽어주고, 탐험가는 타자쳐서 통과하세요!</p>
             </div>
-
             <button class="btn-pink" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('howto-modal').style.display='none'">I UNDERSTAND!</button>
         </div>
     </div>
@@ -299,14 +291,12 @@
         let isHost = false; let myTeam = "none"; let myRole = "";
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
 
-        // ★ [맵 재설계] 검문소[2,2]를 무조건 통과해야 하는 구조
-        // 0:도로, 1:잔디, 3:장애물, 7:검문소, 그외:건물
         const mapData = [
-            [2, 0, 3, 0, 4], // y=0: Hospital[0,0], 장애물[2,0], School[4,0]
-            [1, 0, 1, 0, 1], // y=1: 세로 도로 2개
-            [5, 0, 7, 0, 6], // y=2: Bank[0,2], 검문소[2,2], Park[4,2]
-            [1, 1, 0, 1, 1], // y=3: 검문소로 가는 외길
-            [1, 1, 0, 0, 0]  // y=4: 시작점[4,4]
+            [2, 0, 0, 3, 4],
+            [1, 3, 0, 1, 0],
+            [5, 0, 7, 0, 0], 
+            [1, 0, 1, 3, 0],
+            [0, 0, 0, 6, 1]
         ];
         
         const targets = [
@@ -435,7 +425,7 @@
                         rData[`teams/${t}/lastSender`] = "";
                         rData[`teams/${t}/movesLeft`] = 0; 
                         rData[`teams/${t}/tollgateCleared`] = false;
-                        rData[`teams/${t}/arrivalSignaled`] = false; // 도착 신호 초기화
+                        rData[`teams/${t}/arrivalSignaled`] = false; 
                     }
                 });
                 db.ref(`rooms/${currentRoom}`).update(rData);
@@ -484,7 +474,6 @@
                         if(mapData[y][x] === 0) cell.classList.add('road');
                         if(mapData[y][x] === 3) { cell.innerText = '🪨'; cell.classList.add('obstacle-cell'); }
                         
-                        // 맵 건물 및 영어 이름표 렌더링
                         if([2,4,5,6].includes(mapData[y][x])) {
                             let bData = getBuildingData(mapData[y][x]);
                             cell.innerHTML = `<span style="font-size: 1.8rem;">${bData.emoji}</span><span class="map-label">${bData.name}</span>`;
@@ -498,7 +487,6 @@
                     }
                 }
             } else {
-                // 탐험가 상황 노출
                 document.getElementById('target-name').innerText = targetObj.situation;
                 document.getElementById('explorer-controls').style.display = 'block';
 
@@ -527,7 +515,6 @@
                 sprite.style.transform = `rotate(${tData.charDir * 90}deg)`;
             }
 
-            // 실시간 선 렌더링
             if(tData.path) {
                 const pathArr = tData.path.split('|');
                 const points = pathArr.map(p => {
@@ -543,12 +530,14 @@
 
             const explorerForm = document.getElementById('explorer-chat-form');
             const moveCompleteBtn = document.getElementById('btn-move-complete');
+            const checkBtn = document.getElementById('check-btn');
             const guideForm = document.getElementById('guide-chat-form');
             const guideArrivalForm = document.getElementById('guide-arrival-form');
             const promptEl = document.getElementById('action-prompt');
 
             explorerForm.style.display = 'none';
             moveCompleteBtn.style.display = 'none';
+            checkBtn.style.display = 'none'; // 버튼 기본 숨김
             guideForm.style.display = 'none';
             guideArrivalForm.style.display = 'none';
 
@@ -566,7 +555,11 @@
                 if(moves > 0) { btnFwd.disabled = false; btnBwd.disabled = false; } 
                 else { btnFwd.disabled = true; btnBwd.disabled = true; }
 
-                if(!tData.lastSender) {
+                // 버튼 가시성 로직 완전 분리
+                if(tData.arrivalSignaled) {
+                    checkBtn.style.display = 'block';
+                    promptEl.innerText = "👉 Guide signaled! Check Location!";
+                } else if(!tData.lastSender) {
                     explorerForm.style.display = 'flex';
                     promptEl.innerText = "👉 Ask for the destination first!";
                 } else if(tData.lastSender === 'guide') {
@@ -614,7 +607,6 @@
             });
         }
 
-        // 영어 대화식 Move Complete 시스템
         function sendMoveComplete() {
             const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> ✅ Move complete! What's next?</div>`;
             
@@ -643,7 +635,6 @@
             });
         }
 
-        // 가이드의 도착 허가(신호) 시스템
         function sendArrivalSignal() {
             const msgText = document.getElementById('chat-arrival').value;
             const msg = `<div style="padding: 2px 0;"><span style="color:#006064;">[Guide] ${myName}:</span> 📢 ${msgText}</div>`;
@@ -652,7 +643,7 @@
                 db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
                     chatLog: currentLog + msg,
                     lastSender: 'guide',
-                    arrivalSignaled: true // 탐험가가 클리어할 수 있도록 권한 부여
+                    arrivalSignaled: true
                 });
             });
         }
@@ -675,7 +666,6 @@
                 let step = action === 'forward' ? 1 : -1;
                 if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
 
-                // 도로(0), 검문소(7), 현재 라운드 목적지만 밟을 수 있음
                 let targetId = targets[d.round - 1].id;
                 let allowedCells = [0, 7, targetId];
 
@@ -690,9 +680,11 @@
                     let newPath = d.path + `|${nx},${ny}`;
                     db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 });
                 } else {
+                    // 잘못된 길(잔디/장애물 등) 부딪힐 때 빨갛게 떨리는 애니메이션 강제 실행
                     const sprite = document.getElementById('player-sprite');
-                    sprite.style.filter = 'drop-shadow(0 0 10px red)';
-                    setTimeout(() => sprite.style.filter = 'none', 300);
+                    sprite.classList.remove('shake-error');
+                    void sprite.offsetWidth; // Reflow를 일으켜 애니메이션 재시작 유도
+                    sprite.classList.add('shake-error');
                 }
             });
         }
