@@ -13,7 +13,6 @@
             --bg: #2d004b; --grid-road: #dcdcdc; --grid-grass: #c1f0c1;
             --btn-forward: #00f0ff; --btn-backward: #ffb3d9; --btn-right: #ffeb3b; --btn-left: #ff8c00;
         }
-        /* 모바일/태블릿 잘림 방지를 위해 overflow 고정 해제 및 최소 높이 지정 */
         body { margin: 0; font-family: 'Nunito', sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-y: auto; padding-bottom: 40px; box-sizing: border-box; user-select: none; }
         h1 { font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: #ff007f; text-shadow: 2px 2px white, 4px 4px #00f0ff; margin: 5px 0; }
         
@@ -91,7 +90,7 @@
         .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center;}
         .modal-box { background: white; color: black; border: 5px solid #ff007f; border-radius: 20px; padding: 20px; width: 85%; max-width: 600px; font-family: 'Fredoka One'; max-height: 80vh; overflow-y: auto;}
         
-        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 10px 0; display: none; text-align: center;}
+        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 5px 0; display: none; text-align: center;}
         .howto-section { text-align: left; margin-bottom: 20px; padding: 10px; border-left: 5px solid #00f0ff; background: #f0f0f0; border-radius: 0 10px 10px 0;}
     </style>
 </head>
@@ -108,31 +107,31 @@
             <div class="char-option selected" onclick="selectChar('char1.png', this)"><img src="char1.png" alt="" onerror="this.style.display='none'"></div>
             <div class="char-option" onclick="selectChar('char2.png', this)"><img src="char2.png" alt="" onerror="this.style.display='none'"></div>
             <div class="char-option" onclick="selectChar('char3.png', this)"><img src="char3.png" alt="" onerror="this.style.display='none'"></div>
-            <div class="char-option" onclick="char4.png', this)"><img src="char4.png" alt="" onerror="this.style.display='none'"></div>
+            <div class="char-option" onclick="selectChar('char4.png', this)"><img src="char4.png" alt="" onerror="this.style.display='none'"></div>
             <div class="char-option" onclick="selectChar('char5.png', this)"><img src="char5.png" alt="" onerror="this.style.display='none'"></div>
         </div>
 
         <div style="display: flex; gap: 15px; margin-top: 10px;">
-            <button class="btn-yellow" onclick="document.getElementById('howto-modal').style.display='flex'">❓ How to Play</button>
-            <button class="btn-pink" onclick="login()">ENTER GAME</button>
+            <button type="button" class="btn-yellow" onclick="document.getElementById('howto-modal').style.display='flex'">❓ How to Play</button>
+            <button type="button" class="btn-pink" onclick="login()">ENTER GAME</button>
         </div>
     </div>
 
     <div id="lobby-screen" class="screen">
         <h2>Welcome, <span id="display-name" style="color: yellow;"></span>!</h2>
         <div style="display: flex; gap: 20px; margin-top: 30px; align-items: center;">
-            <button class="btn-cyan" onclick="createRoom()">CREATE ROOM</button>
+            <button type="button" class="btn-cyan" onclick="createRoom()">CREATE ROOM</button>
             <h3 style="margin: 0 20px;">OR</h3>
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 <input type="text" id="room-code-input" placeholder="Enter 4 Digits" maxlength="4">
-                <button class="btn-yellow" onclick="joinRoom()">JOIN ROOM</button>
+                <button type="button" class="btn-yellow" onclick="joinRoom()">JOIN ROOM</button>
             </div>
         </div>
     </div>
 
     <div id="room-screen" class="screen">
         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-            <button class="btn-red" style="padding: 8px 15px; font-size: 1rem;" onclick="leaveRoom()">◀ Leave Room</button>
+            <button type="button" class="btn-red" style="padding: 8px 15px; font-size: 1rem;" onclick="leaveRoom()">◀ Leave Room</button>
             <h2>Room Code: <span id="room-code-display" style="color:#39ff14; font-size: 2.5rem;"></span></h2>
             <div style="width:100px;"></div>
         </div>
@@ -143,8 +142,8 @@
             <div class="team-box" id="team-none" ondragover="allowDrop(event)" ondrop="drop(event, 'none')"><div class="team-title" style="color: white;">Waiting Area</div></div>
         </div>
         <div style="margin-top: 20px; display: flex; gap: 20px;">
-            <button class="btn-cyan" id="ready-btn" onclick="toggleReady()">READY</button>
-            <button class="btn-pink" id="start-game-btn" onclick="startGame()" style="display: none; background-color: gray;" disabled>Waiting for Teams/Ready...</button>
+            <button type="button" class="btn-cyan" id="ready-btn" onclick="toggleReady()">READY</button>
+            <button type="button" class="btn-pink" id="start-game-btn" onclick="startGame()" style="display: none; background-color: gray;" disabled>Waiting for Teams/Ready...</button>
         </div>
     </div>
 
@@ -179,7 +178,7 @@
                         <option value="the School?">the School?</option>
                         <option value="the Park?">the Park?</option>
                     </select>
-                    <button class="btn-cyan" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieQuestion()">SEND</button>
+                    <button type="button" class="btn-cyan" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieQuestion()">SEND</button>
                 </div>
 
                 <div id="guide-chat-form" style="display: none;" class="walkie-inputs">
@@ -193,7 +192,7 @@
                         <option value="2">2 blocks.</option>
                         <option value="3">3 blocks.</option>
                     </select>
-                    <button class="btn-yellow" id="guide-send-btn" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieAnswer()">SEND</button>
+                    <button type="button" class="btn-yellow" id="guide-send-btn" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieAnswer()">SEND</button>
                 </div>
 
                 <div id="guide-arrival-form" style="display: none; margin-top: 5px;" class="walkie-inputs">
@@ -202,7 +201,7 @@
                         <option value="It's on your right.">It's on your right.</option>
                         <option value="You arrived at the destination!">You arrived at the destination!</option>
                     </select>
-                    <button class="btn-pink" style="padding: 5px; font-size:0.9rem;" onclick="sendArrivalSignal()">📢 Signal Arrival</button>
+                    <button type="button" class="btn-pink" style="padding: 5px; font-size:0.9rem;" onclick="sendArrivalSignal()">📢 Signal Arrival</button>
                 </div>
             </div>
             
@@ -218,14 +217,14 @@
 
             <div id="explorer-controls" style="display: none; width: 100%;">
                 <div class="controls">
-                    <button id="btn-fwd" style="background: var(--btn-forward)" onclick="moveChar('forward')" disabled>⬆️ Forward</button>
-                    <button id="btn-bwd" style="background: var(--btn-backward)" onclick="moveChar('backward')" disabled>⬇️ Backward</button>
-                    <button id="btn-left" style="background: var(--btn-left)" onclick="moveChar('left')">↩️ Turn Left</button>
-                    <button id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')">↪️ Turn Right</button>
+                    <button type="button" id="btn-fwd" style="background: var(--btn-forward)" onclick="moveChar('forward')" disabled>⬆️ Forward</button>
+                    <button type="button" id="btn-bwd" style="background: var(--btn-backward)" onclick="moveChar('backward')" disabled>⬇️ Backward</button>
+                    <button type="button" id="btn-left" style="background: var(--btn-left)" onclick="moveChar('left')">↩️ Turn Left</button>
+                    <button type="button" id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')">↪️ Turn Right</button>
                 </div>
                 
-                <button class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 10px; display: none;" onclick="sendMoveComplete()">✅ Move Complete (Ask for next direction)</button>
-                <button class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 10px; display: none;">🚩 LOCATION CHECK (Finish Round)</button>
+                <button type="button" class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 10px; display: none;" onclick="sendMoveComplete()">✅ Move Complete (Ask for next direction)</button>
+                <button type="button" class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 10px; display: none;">🚩 LOCATION CHECK (Finish Round)</button>
             </div>
         </div>
     </div>
@@ -235,7 +234,7 @@
             <h2>👮 Police Checkpoint</h2>
             <p style="margin-top:0;">Stop! Talk to your guide and type the password to pass.</p>
             <input type="text" id="tollgate-input" placeholder="Type password here" style="width: 80%; box-sizing: border-box;" autocomplete="off">
-            <button class="btn-yellow" onclick="submitTollgate()" style="width: 80%;">Unlock Road</button>
+            <button type="button" class="btn-yellow" onclick="submitTollgate()" style="width: 80%;">Unlock Road</button>
         </div>
     </div>
 
@@ -246,13 +245,13 @@
             <p id="lounge-my-time" style="color: yellow; font-size: 3rem; margin: 10px 0;">00:00</p>
         </div>
         <p id="lounge-status" style="font-size: 1.2rem; margin-top: 30px;">Waiting for the other team...</p>
-        <button class="btn-cyan" id="lounge-next-btn" style="display: none; margin-top: 20px; font-size: 1.5rem;">START NEXT ROUND</button>
+        <button type="button" class="btn-cyan" id="lounge-next-btn" style="display: none; margin-top: 20px; font-size: 1.5rem;" onclick="startRound(currentRound + 1)">START NEXT ROUND</button>
     </div>
 
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">SUCCESS!</h2>
         <div id="ending-results" class="result-box"></div>
-        <button class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
+        <button type="button" class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
     <div id="howto-modal" class="modal">
@@ -273,7 +272,7 @@
                 <p style="font-size: 0.95rem; margin: 5px 0;">맵 중앙 검문소에서는 <b>가이드 화면에만 암호가 뜹니다.</b> 가이드는 암호를 읽어주고, 탐험가는 타자쳐서 통과하세요!</p>
                 <p style="font-size: 0.9rem; margin: 5px 0; color:#555; font-style:italic;">At the center checkpoint, the password appears <b>only on the Guide's screen.</b> The Guide must read it aloud, and the Explorer must type it to pass.</p>
             </div>
-            <button class="btn-pink" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('howto-modal').style.display='none'">I UNDERSTAND!</button>
+            <button type="button" class="btn-pink" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('howto-modal').style.display='none'">I UNDERSTAND!</button>
         </div>
     </div>
 
@@ -340,14 +339,11 @@
             document.getElementById('room-code-display').innerText = currentRoom;
         }
 
-        // 방 나가기 기능 구현
         function leaveRoom() {
             if (!currentRoom) return;
             db.ref(`rooms/${currentRoom}/players/${myId}`).remove().then(() => {
-                db.ref(`rooms/${currentRoom}`).off(); // 실시간 감지 리스너 해제
-                currentRoom = "";
-                myTeam = "none";
-                myRole = "";
+                db.ref(`rooms/${currentRoom}`).off(); 
+                currentRoom = ""; myTeam = "none"; myRole = "";
                 switchScreen('lobby-screen');
             });
         }
@@ -538,7 +534,8 @@
                     const [px, py] = p.split(',');
                     return `${parseInt(px)*57 + 27.5},${parseInt(py)*57 + 27.5}`;
                 }).join(' ');
-                document.getElementById('path-line').setAttribute('points', points);
+                const pathLine = document.getElementById('path-line');
+                if (pathLine) pathLine.setAttribute('points', points);
             }
 
             const chatBox = document.getElementById('chat-display');
@@ -609,14 +606,73 @@
             }
         }
 
+        // ★ [안전장치 추가] 모든 통신 함수에서 snap.val() || {} 적용
+        function sendWalkieQuestion() {
+            const q1 = document.getElementById('chat-q-1').value;
+            const q2 = document.getElementById('chat-q-2').value;
+            const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> ${q1} ${q2}</div>`;
+            
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
+                let teamData = snap.val() || {};
+                let currentLog = teamData.chatLog || "";
+                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                    chatLog: currentLog + msg,
+                    lastSender: 'explorer'
+                }).catch(e => console.error("Walkie Question Error:", e));
+            });
+        }
+
+        function sendMoveComplete() {
+            const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> ✅ Move complete! What's next?</div>`;
+            
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
+                let teamData = snap.val() || {};
+                let currentLog = teamData.chatLog || "";
+                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                    chatLog: currentLog + msg,
+                    lastSender: 'explorer'
+                }).catch(e => console.error("Move Complete Error:", e));
+            });
+        }
+
+        function sendWalkieAnswer() {
+            const a1 = document.getElementById('chat-a-1').value;
+            const a2 = document.getElementById('chat-a-2').value;
+            const moves = parseInt(a2); 
+            const msg = `<div style="padding: 2px 0;"><span style="color:#006064;">[Guide] ${myName}:</span> ${a1} ${a2}</div>`;
+            
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
+                let teamData = snap.val() || {};
+                let currentLog = teamData.chatLog || "";
+                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                    chatLog: currentLog + msg,
+                    movesLeft: moves,
+                    lastSender: 'guide'
+                }).catch(e => console.error("Walkie Answer Error:", e));
+            });
+        }
+
+        function sendArrivalSignal() {
+            const msgText = document.getElementById('chat-arrival').value;
+            const msg = `<div style="padding: 2px 0;"><span style="color:#006064;">[Guide] ${myName}:</span> 📢 ${msgText}</div>`;
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
+                let teamData = snap.val() || {};
+                let currentLog = teamData.chatLog || "";
+                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                    chatLog: currentLog + msg,
+                    lastSender: 'guide',
+                    arrivalSignaled: true
+                }).catch(e => console.error("Arrival Signal Error:", e));
+            });
+        }
+
+        // ★ [오류 수정] d.round 대신 글로벌 currentRound 사용, null 체크 강화
         function moveChar(action) {
             if (myRole !== 'Explorer') return; 
-            db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
-                let roomData = snapshot.val();
-                if(!roomData || !roomData.teams || !roomData.teams[myTeam]) return;
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snapshot => {
+                let d = snapshot.val();
+                if (!d) return;
 
-                let d = roomData.teams[myTeam];
-                let roundNum = roomData.round || 1;
                 let nx = d.charX, ny = d.charY, nd = d.charDir;
                 let mLeft = d.movesLeft || 0;
 
@@ -631,8 +687,9 @@
                 let step = action === 'forward' ? 1 : -1;
                 if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
 
-                // 모든 건물 및 특수타일 자유 진입 허용
-                let allowedCells = [0, 2, 4, 5, 6, 7];
+                // 글로벌 변수로 안전하게 목적지 추출
+                let targetId = targets[currentRound - 1].id;
+                let allowedCells = [0, 2, 4, 5, 6, 7]; // 모든 목적지 자유 진입
 
                 if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && allowedCells.includes(mapData[ny][nx])) {
                     if(mapData[ny][nx] === 7 && !d.tollgateCleared) {
@@ -656,7 +713,7 @@
                         sprite.classList.add('shake-error');
                     }
                 }
-            });
+            }).catch(e => console.error("Move Error:", e));
         }
 
         function submitTollgate() {
@@ -675,7 +732,10 @@
         function checkWin() {
             if (myRole !== 'Explorer') return;
             db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
-                let d = snapshot.val(); let tData = d.teams[myTeam];
+                let d = snapshot.val();
+                if(!d || !d.teams || !d.teams[myTeam]) return;
+                
+                let tData = d.teams[myTeam];
                 const targetObj = targets[d.round - 1];
 
                 if(tData.charX === targetObj.x && tData.charY === targetObj.y) {
@@ -709,7 +769,7 @@
             }
             if(data.status === 'round_end') {
                 document.getElementById('lounge-status').innerText = "All teams have finished!";
-                if(isHost) { document.getElementById('lounge-next-btn').style.display = 'block'; document.getElementById('lounge-next-btn').onclick = () => startRound(data.round + 1); } 
+                if(isHost) { document.getElementById('lounge-next-btn').style.display = 'block'; } 
                 else { document.getElementById('lounge-next-btn').style.display = 'none'; }
             } else {
                 document.getElementById('lounge-status').innerText = "Waiting for the other team..."; document.getElementById('lounge-next-btn').style.display = 'none';
