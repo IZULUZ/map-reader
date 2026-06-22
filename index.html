@@ -29,11 +29,11 @@
 
         input, select { font-family: 'Nunito', sans-serif; font-size: 1.2rem; padding: 10px; border: 4px solid black; border-radius: 10px; text-align: center; margin-bottom: 10px; }
         
+        /* 캐릭터 선택 UI (검은 점/이모티콘 오류 수정) */
         .char-selection-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;}
         .char-option { width: 70px; height: 70px; border: 4px solid white; border-radius: 15px; background-color: rgba(255,255,255,0.2); cursor: pointer; overflow: hidden; display: flex; justify-content: center; align-items: center; position: relative; }
         .char-option.selected { border-color: #39ff14; background-color: rgba(57,255,20,0.3); box-shadow: 0 0 15px #39ff14; }
         .char-option img { width: 100%; height: 100%; object-fit: contain; }
-        .char-option::before { content: '👤'; font-size: 2rem; position: absolute; z-index: -1; }
         
         .team-container { display: flex; gap: 20px; width: 100%; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
         .team-box { width: 280px; min-height: 150px; border: 4px dashed white; border-radius: 20px; padding: 10px; background: rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 10px; align-items: center; }
@@ -46,8 +46,8 @@
         
         .board-section { display: flex; flex-direction: column; align-items: center; background: #fff9e6; border: 4px solid black; border-radius: 20px; padding: 15px; width: 100%; max-width: 500px; box-sizing: border-box;}
         
-        /* 통합 목적지 배너 */
-        #target-banner { font-family: 'Fredoka One'; font-size: 1.5rem; color: #ff007f; background: white; padding: 5px 15px; border-radius: 10px; border: 3px solid black; margin-bottom: 10px; text-align: center; width: 100%; box-sizing: border-box; }
+        /* 통합 목적지 배너 (상황 표시 가능) */
+        #target-banner { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.3rem; color: #ff007f; background: white; padding: 5px 15px; border-radius: 10px; border: 3px solid black; margin-bottom: 10px; text-align: center; width: 100%; box-sizing: border-box; }
         
         .grid-board { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 2px; background: black; border: 4px solid black; position: relative; margin-bottom: 10px;}
         .cell { width: 55px; height: 55px; background-color: var(--grid-grass); display: flex; justify-content: center; align-items: center; font-size: 1.8rem; position: relative; z-index: 1;}
@@ -61,11 +61,10 @@
         .char-sprite { width: 40px; height: 40px; object-fit: contain; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
         .char-name-tag { position: absolute; bottom: -8px; background: rgba(0,0,0,0.8); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; white-space: nowrap; }
         
-        /* 무전기(채팅 로그) 시스템 */
         .walkie-talkie { background: #e0f7fa; border: 4px solid #006064; border-radius: 10px; padding: 10px; width: 100%; box-sizing: border-box; color: black; margin-bottom: 10px;}
         .walkie-title { font-family: 'Fredoka One'; color: #006064; margin: 0 0 5px 0; font-size: 1rem; display: flex; justify-content: space-between; align-items: center;}
         
-        .chat-history { background: white; border: 2px solid #006064; padding: 10px; border-radius: 5px; height: 70px; overflow-y: auto; margin-bottom: 10px; font-size: 0.95rem; font-weight: bold; line-height: 1.4; display: flex; flex-direction: column; gap: 5px;}
+        .chat-history { background: white; border: 2px solid #006064; padding: 10px; border-radius: 5px; height: 75px; overflow-y: auto; margin-bottom: 10px; font-size: 0.95rem; font-weight: bold; line-height: 1.4; display: flex; flex-direction: column; gap: 5px;}
         
         .walkie-inputs { display: flex; gap: 5px; }
         .walkie-inputs select { padding: 5px; font-size: 0.9rem; flex: 1; margin: 0;}
@@ -91,6 +90,7 @@
 
     <h1>Map Reader</h1>
 
+    <!-- 1. 인트로 화면 -->
     <div id="intro-screen" class="screen active">
         <h2 style="color:var(--btn-forward)">Enter Your Nickname</h2>
         <input type="text" id="nickname-input" placeholder="Your Name" maxlength="10">
@@ -110,6 +110,7 @@
         </div>
     </div>
 
+    <!-- 2. 로비 화면 -->
     <div id="lobby-screen" class="screen">
         <h2>Welcome, <span id="display-name" style="color: yellow;"></span>!</h2>
         <div style="display: flex; gap: 20px; margin-top: 30px; align-items: center;">
@@ -122,6 +123,7 @@
         </div>
     </div>
 
+    <!-- 3. 대기방 화면 -->
     <div id="room-screen" class="screen">
         <h2>Room Code: <span id="room-code-display" style="color:#39ff14; font-size: 3rem;"></span></h2>
         <p>Drag your character card to pick a team!</p>
@@ -132,10 +134,12 @@
         </div>
         <div style="margin-top: 20px; display: flex; gap: 20px;">
             <button class="btn-cyan" id="ready-btn" onclick="toggleReady()">READY</button>
-            <button class="btn-pink" id="start-game-btn" onclick="startGame()" style="display: none;" disabled>Waiting for Ready...</button>
+            <!-- 방장 시작 버튼 (조건 만족 시에만 활성화 됨) -->
+            <button class="btn-pink" id="start-game-btn" onclick="startGame()" style="display: none; background-color: gray;" disabled>Waiting for Teams/Ready...</button>
         </div>
     </div>
 
+    <!-- 4. 게임 화면 -->
     <div id="game-screen" class="screen">
         <div class="game-header">
             <span id="round-info">Round 1/4</span>
@@ -145,9 +149,11 @@
         
         <div class="board-section" id="my-board-section">
             
-            <div id="target-banner">Target: <span id="target-name">Wait...</span></div>
+            <!-- 통합 목적지 표시 및 가이드 전용 암호 패널 -->
+            <div id="target-banner">Situation: <span id="target-name">Wait...</span></div>
             <div id="tollgate-password-display">Password: <span id="secret-word"></span></div>
 
+            <!-- 무전기 (채팅 로그) -->
             <div class="walkie-talkie" id="walkie-talkie">
                 <div class="walkie-title">
                     <span>📻 Walkie-Talkie</span>
@@ -157,6 +163,7 @@
                 
                 <div class="chat-history" id="chat-display"></div>
                 
+                <!-- 처음 한 번 묻는 폼 -->
                 <div id="explorer-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-q-1">
                         <option value="How can I get to">How can I get to</option>
@@ -171,8 +178,7 @@
                     <button class="btn-cyan" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieQuestion()">SEND</button>
                 </div>
 
-                <button class="btn-cyan" id="btn-move-complete" style="width: 100%; display: none;" onclick="sendMoveComplete()">✅ Move Complete (Ask Next)</button>
-
+                <!-- 가이드 답변 폼 -->
                 <div id="guide-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-a-1">
                         <option value="Go straight">Go straight</option>
@@ -189,6 +195,7 @@
             </div>
             
             <div class="grid-board" id="grid">
+                <!-- 이동 경로 선 (SVG) -->
                 <svg id="path-svg" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:4;">
                     <polyline id="path-line" fill="none" stroke="#ffeb3b" stroke-width="5" stroke-dasharray="8 4" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
@@ -199,6 +206,7 @@
                 </div>
             </div>
 
+            <!-- 탐험가 전용 조종 -->
             <div id="explorer-controls" style="display: none; width: 100%;">
                 <div class="controls">
                     <button id="btn-fwd" style="background: var(--btn-forward)" onclick="moveChar('forward')" disabled>⬆️ Forward</button>
@@ -206,11 +214,15 @@
                     <button id="btn-left" style="background: var(--btn-left)" onclick="moveChar('left')">↩️ Turn Left</button>
                     <button id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')">↪️ Turn Right</button>
                 </div>
+                <!-- 이동 완료 버튼 (새로운 통신 방식) -->
+                <button class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 10px; display: none;" onclick="sendMoveComplete()">✅ Move Complete (이동완료! 다음 길 알려줘)</button>
+                
                 <button class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 10px;">🚩 CHECK DESTINATION</button>
             </div>
         </div>
     </div>
 
+    <!-- 검문소(Tollgate) 모달 -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2>👮 Police Checkpoint</h2>
@@ -220,6 +232,7 @@
         </div>
     </div>
 
+    <!-- 5. 라운지 화면 -->
     <div id="lounge-screen" class="screen">
         <h2 id="lounge-title" style="color: #39ff14; font-size: 3rem;">Round Cleared!</h2>
         <div class="result-box">
@@ -230,19 +243,21 @@
         <button class="btn-cyan" id="lounge-next-btn" style="display: none; margin-top: 20px; font-size: 1.5rem;">START NEXT ROUND</button>
     </div>
 
+    <!-- 6. 게임 종료 -->
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">GAME OVER!</h2>
         <div id="ending-results" class="result-box"></div>
         <button class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
+    <!-- How to Play 모달 -->
     <div id="howto-modal" class="modal">
         <div class="modal-box">
             <h2 style="color: #00f0ff; margin-top: 0; text-shadow: 2px 2px black;">❓ HOW TO PLAY</h2>
             
             <div class="howto-section">
                 <h3 style="margin: 0; color: #ff007f;">1. Explorer (탐험가)</h3>
-                <p style="font-size: 1rem; margin: 5px 0;">목적지를 확인하고 무전기로 가이드에게 <b>먼저 질문하세요!</b> <br>답장이 오면 전진/후진을 하고, 조종이 끝나면 <b>[Move Complete]</b>를 눌러 다음 길을 물어보세요.</p>
+                <p style="font-size: 1rem; margin: 5px 0;">주어진 'Situation(상황)'을 보고 정답 목적지를 추리하세요. 무전기로 가이드에게 <b>먼저 질문하세요!</b> <br>답장이 오면 조종을 하고, 이동을 마친 후 <b>[Move Complete]</b>를 누르면 가이드에게 다음 길을 요구할 수 있습니다.</p>
             </div>
 
             <div class="howto-section">
@@ -286,11 +301,12 @@
             [0, 0, 0, 6, 1]
         ];
         
+        // 탐험가에게 주어질 "상황(Situation)" 추가
         const targets = [
-            { id: 2, name: "HOSPITAL 🏥", x: 0, y: 0, pwd: "Where is the post office" },
-            { id: 4, name: "SCHOOL 🏫", x: 4, y: 0, pwd: "It is on your left" },
-            { id: 5, name: "BANK 🏦", x: 0, y: 2, pwd: "Go straight two blocks" },
-            { id: 6, name: "PARK 🌲", x: 3, y: 4, pwd: "Turn right at the corner" }
+            { id: 2, name: "HOSPITAL 🏥", x: 0, y: 0, pwd: "Where is the post office", situation: "I have a cold. 🤧 (감기에 걸렸어요.)" },
+            { id: 4, name: "SCHOOL 🏫", x: 4, y: 0, pwd: "It is on your left", situation: "I have an English class! 🎒 (영어 수업이 있어요!)" },
+            { id: 5, name: "BANK 🏦", x: 0, y: 2, pwd: "Go straight two blocks", situation: "I need to save money. 💰 (저금을 해야 해요.)" },
+            { id: 6, name: "PARK 🌲", x: 3, y: 4, pwd: "Turn right at the corner", situation: "I want to ride a bike. 🚲 (자전거를 타고 싶어요.)" }
         ];
 
         function selectChar(imgName, element) {
@@ -347,7 +363,7 @@
             });
         }
 
-        // [수정] 대기실 인원 체크 및 시작 제어 로직
+        // 방 인원 검사 및 시작 버튼 강력 제어
         function renderWaitingRoom(players) {
             ['A', 'B', 'none'].forEach(t => document.getElementById(`team-${t}`).innerHTML = `<div class="team-title" style="color: ${t==='A'?'#ff007f':t==='B'?'#00f0ff':'white'};">TEAM ${t==='none'?'Waiting Area':t}</div>`);
             
@@ -366,7 +382,7 @@
                 document.getElementById('team-' + p.team).appendChild(div);
             }
 
-            // [조건] 방 시작 가능 여부 (무조건 팀당 2명, 전체 2명 혹은 4명)
+            // 조건: 한 방에 2명이 한 팀이거나, 4명이 2명씩 나뉘었을 때만
             let isValid = false;
             if(total === 2 && ((tA === 2 && tB === 0) || (tA === 0 && tB === 2))) isValid = true;
             if(total === 4 && tA === 2 && tB === 2) isValid = true;
@@ -380,8 +396,12 @@
                     startBtn.style.backgroundColor = "#ff007f";
                 } else {
                     startBtn.disabled = true;
-                    startBtn.innerText = "Waiting for Teams/Ready...";
                     startBtn.style.backgroundColor = "gray";
+                    if(!isValid) {
+                        startBtn.innerText = "Need 2 players per team!";
+                    } else {
+                        startBtn.innerText = "Waiting for Ready...";
+                    }
                 }
             }
         }
@@ -450,7 +470,6 @@
             document.querySelectorAll('.cell').forEach(e => e.remove());
             const targetObj = targets[currentRound - 1];
 
-            // [수정] 목적지 통합 배너 세팅
             if(myRole === 'Guide' || myRole === 'Spectator') {
                 document.getElementById('target-name').innerText = "??? (Listen to Walkie-Talkie)";
                 document.getElementById('explorer-controls').style.display = 'none';
@@ -469,7 +488,8 @@
                     }
                 }
             } else {
-                document.getElementById('target-name').innerText = targetObj.name;
+                // 탐험가에게는 상황(Situation) 출력
+                document.getElementById('target-name').innerText = targetObj.situation;
                 document.getElementById('explorer-controls').style.display = 'block';
 
                 for(let i=0; i<25; i++) {
@@ -497,10 +517,8 @@
                 sprite.style.transform = `rotate(${tData.charDir * 90}deg)`;
             }
 
-            // [수정] 이동 경로를 선(SVG Line)으로 그리기 (둘 다 보임)
             if(tData.path) {
                 const pathArr = tData.path.split('|');
-                // 셀 크기 55px + 간격 2px = 57px 이동. 중앙 좌표는 27.5
                 const points = pathArr.map(p => {
                     const [px, py] = p.split(',');
                     return `${parseInt(px)*57 + 27.5},${parseInt(py)*57 + 27.5}`;
@@ -508,12 +526,10 @@
                 document.getElementById('path-line').setAttribute('points', points);
             }
 
-            // 실시간 스크롤 채팅 업데이트
             const chatBox = document.getElementById('chat-display');
             chatBox.innerHTML = tData.chatLog || "<span style='color:gray; font-weight:normal;'>No messages yet.</span>";
             chatBox.scrollTop = chatBox.scrollHeight;
 
-            // --- UI 상태 머신 (무전기 및 버튼) ---
             const explorerForm = document.getElementById('explorer-chat-form');
             const moveCompleteBtn = document.getElementById('btn-move-complete');
             const guideForm = document.getElementById('guide-chat-form');
@@ -538,12 +554,14 @@
                 else { btnFwd.disabled = true; btnBwd.disabled = true; }
 
                 if(!tData.lastSender) {
+                    // 최초 질문 폼
                     explorerForm.style.display = 'flex';
                     promptEl.innerText = "👉 Ask for the destination first!";
                 } else if(tData.lastSender === 'guide') {
                     if(moves > 0) {
                         promptEl.innerText = "👉 Move your character!";
                     } else {
+                        // 이동력 소진 시 이동 완료 버튼 표시
                         moveCompleteBtn.style.display = 'block';
                         promptEl.innerText = "👉 Click 'Move Complete' to ask for more!";
                     }
@@ -557,10 +575,9 @@
                     guideForm.style.display = 'flex';
                     promptEl.innerText = "👉 Give directions!";
                 } else {
-                    promptEl.innerText = "⏳ Waiting for Explorer to ask...";
+                    promptEl.innerText = "⏳ Waiting for Explorer...";
                 }
 
-                // 검문소 암호 표시 (가이드에게만)
                 const pwdDisplay = document.getElementById('tollgate-password-display');
                 if(!tData.tollgateCleared && tData.charX === 2 && tData.charY === 2) {
                     pwdDisplay.style.display = 'block';
@@ -571,7 +588,7 @@
             }
         }
 
-        // [수정] 닉네임과 역할이 표시되는 채팅 발송
+        // 무전기(채팅) 발송: 이름과 역할 명시
         function sendWalkieQuestion() {
             const q1 = document.getElementById('chat-q-1').value;
             const q2 = document.getElementById('chat-q-2').value;
@@ -586,9 +603,8 @@
             });
         }
 
-        // [추가] 이동 완료 신호 발송
         function sendMoveComplete() {
-            const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> Move complete! What's next?</div>`;
+            const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> ✅ 이동완료! 다음 길을 알려주세요.</div>`;
             
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
                 let currentLog = snap.val().chatLog || "";
