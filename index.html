@@ -21,11 +21,13 @@
 
         button { font-family: 'Fredoka One', cursive; font-size: 1.2rem; padding: 12px 20px; border: 4px solid black; border-radius: 15px; cursor: pointer; box-shadow: 4px 4px black; transition: transform 0.1s; }
         button:active { transform: translate(4px, 4px); box-shadow: none; }
+        button:disabled { filter: grayscale(100%); cursor: not-allowed; box-shadow: none; transform: none; }
+        
         .btn-pink { background-color: #ff007f; color: white; }
         .btn-cyan { background-color: #00f0ff; color: black; }
         .btn-yellow { background-color: #ffeb3b; color: black; }
 
-        input { font-family: 'Nunito', sans-serif; font-size: 1.5rem; padding: 10px; border: 4px solid black; border-radius: 10px; text-align: center; margin-bottom: 20px; }
+        input, select { font-family: 'Nunito', sans-serif; font-size: 1.2rem; padding: 10px; border: 4px solid black; border-radius: 10px; text-align: center; margin-bottom: 10px; }
         
         .char-selection-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;}
         .char-option { width: 70px; height: 70px; border: 4px solid white; border-radius: 15px; background-color: rgba(255,255,255,0.2); cursor: pointer; overflow: hidden; display: flex; justify-content: center; align-items: center; position: relative; }
@@ -38,29 +40,39 @@
         .player-card { background: white; color: black; border: 3px solid black; border-radius: 10px; padding: 5px 10px; width: 85%; cursor: grab; display: flex; align-items: center; gap: 10px; font-weight: 900; }
         .player-card img { width: 35px; height: 35px; object-fit: contain; background: #eee; border-radius: 5px; }
 
-        .game-header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; background: white; color: black; border: 4px solid black; border-radius: 10px; padding: 10px 20px; margin-bottom: 10px; font-family: 'Fredoka One'; font-size: 1.2rem; box-sizing: border-box;}
-        .timer { color: #ff007f; font-size: 1.5rem; }
-
+        .game-header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; background: white; color: black; border: 4px solid black; border-radius: 10px; padding: 10px 20px; margin-bottom: 5px; font-family: 'Fredoka One'; font-size: 1.2rem; box-sizing: border-box;}
+        
         .board-section { display: flex; flex-direction: column; align-items: center; background: #fff9e6; border: 4px solid black; border-radius: 20px; padding: 15px; width: 100%; max-width: 500px; box-sizing: border-box;}
-        .grid-board { display: grid; grid-template-columns: repeat(5, 60px); grid-template-rows: repeat(5, 60px); gap: 2px; background: black; border: 4px solid black; position: relative; }
-        .cell { width: 60px; height: 60px; background-color: var(--grid-grass); display: flex; justify-content: center; align-items: center; font-size: 2rem; position: relative; }
+        .grid-board { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 2px; background: black; border: 4px solid black; position: relative; margin-bottom: 10px;}
+        .cell { width: 55px; height: 55px; background-color: var(--grid-grass); display: flex; justify-content: center; align-items: center; font-size: 1.8rem; position: relative; }
         
         .road { background-color: var(--grid-road); background-image: url('./road.png'); background-size: cover; }
         .obstacle-cell { background-image: url('./obstacle.png'); background-size: cover; }
         .building-cell { position: relative; background-size: cover; }
+        .tollgate-cell { background-color: #ffcccc; border: 2px dashed red; } /* 경찰 검문소 칸 */
         
-        .char-wrapper { position: absolute; width: 60px; height: 60px; z-index: 10; transition: transform 0.3s ease-in-out; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; }
-        .char-sprite { width: 45px; height: 45px; object-fit: contain; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
-        .char-name-tag { position: absolute; bottom: -10px; background: rgba(0,0,0,0.8); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; font-weight: bold; white-space: nowrap; }
-        
-        .path-dot { width: 12px; height: 12px; background-color: yellow; border: 2px solid black; border-radius: 50%; position: absolute; z-index: 5; }
+        .char-wrapper { position: absolute; width: 55px; height: 55px; z-index: 10; transition: transform 0.3s ease-in-out; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; }
+        .char-sprite { width: 40px; height: 40px; object-fit: contain; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
+        .char-name-tag { position: absolute; bottom: -8px; background: rgba(0,0,0,0.8); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; white-space: nowrap; }
+        .path-dot { width: 10px; height: 10px; background-color: yellow; border: 2px solid black; border-radius: 50%; position: absolute; z-index: 5; }
 
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; width: 100%; }
-        #dest-display { font-family: 'Fredoka One'; font-size: 1.5rem; color: #ff007f; margin-bottom: 10px; background: white; padding: 5px 15px; border-radius: 10px; border: 3px solid black; text-align: center; width: 100%; box-sizing: border-box;}
+        /* 무전기(채팅) 및 컨트롤 UI */
+        .walkie-talkie { background: #e0f7fa; border: 4px solid #006064; border-radius: 10px; padding: 10px; width: 100%; box-sizing: border-box; color: black; margin-bottom: 10px;}
+        .walkie-title { font-family: 'Fredoka One'; color: #006064; margin: 0 0 5px 0; font-size: 1rem; display: flex; justify-content: space-between;}
+        .message-box { background: white; border: 2px solid #006064; padding: 5px; border-radius: 5px; font-weight: bold; min-height: 25px; margin-bottom: 5px; font-size: 0.9rem;}
+        .walkie-inputs { display: flex; gap: 5px; }
+        .walkie-inputs select { padding: 5px; font-size: 0.9rem; flex: 1; margin: 0;}
+
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+        .controls button { padding: 10px; font-size: 1rem; }
+        
         #role-display { color: yellow; margin: 5px 0; text-align: center; }
-
-        /* 결과 표시용 라운지 박스 */
         .result-box { background: rgba(255,255,255,0.1); border: 4px dashed white; border-radius: 20px; padding: 20px; text-align: center; width: 100%; max-width: 400px; margin-top: 20px;}
+        
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center;}
+        .modal-box { background: white; color: black; border: 5px solid #ff007f; border-radius: 20px; padding: 20px; width: 85%; max-width: 400px; font-family: 'Fredoka One'; }
+        
+        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 10px 0; display: none;}
     </style>
 </head>
 <body>
@@ -70,7 +82,6 @@
     <div id="intro-screen" class="screen active">
         <h2 style="color:var(--btn-forward)">Enter Your Nickname</h2>
         <input type="text" id="nickname-input" placeholder="Your Name" maxlength="10">
-        
         <h3 style="color:var(--btn-right)">Select Your Character</h3>
         <div class="char-selection-container">
             <div class="char-option selected" onclick="selectChar('./char1.png', this)"><img src="./char1.png" alt="char1"></div>
@@ -79,7 +90,6 @@
             <div class="char-option" onclick="selectChar('./char4.png', this)"><img src="./char4.png" alt="char4"></div>
             <div class="char-option" onclick="selectChar('./char5.png', this)"><img src="./char5.png" alt="char5"></div>
         </div>
-
         <button class="btn-pink" onclick="login()">ENTER GAME</button>
     </div>
 
@@ -114,10 +124,52 @@
             <span id="round-info">Round 1/4</span>
             <span class="timer" id="timer-display">00:00</span>
         </div>
-        <h3 id="role-display"></h3>
+        <h3 id="role-display" style="margin: 0 0 5px 0;"></h3>
         
         <div class="board-section" id="my-board-section">
-            <div id="dest-display">Wait...</div>
+            
+            <div id="guide-info-panel" style="display: none; width: 100%; text-align: center;">
+                <div style="font-family:'Fredoka One'; font-size:1.2rem; color:#ff007f; background:white; padding:5px; border-radius:5px; border:2px solid black; margin-bottom:5px;">
+                    Target: <span id="guide-target-display"></span>
+                </div>
+                <div id="tollgate-password-display">Password: <span id="secret-word"></span></div>
+            </div>
+
+            <div class="walkie-talkie" id="walkie-talkie">
+                <div class="walkie-title">
+                    <span>📻 Walkie-Talkie</span>
+                    <span id="moves-badge" style="background:#ff007f; color:white; padding:2px 8px; border-radius:10px; font-size:0.8rem; display:none;">Moves: 0</span>
+                </div>
+                <div class="message-box" id="chat-display">No messages yet.</div>
+                
+                <div id="explorer-chat-form" style="display: none;" class="walkie-inputs">
+                    <select id="chat-q-1">
+                        <option value="How can I get to">How can I get to</option>
+                        <option value="Where is">Where is</option>
+                    </select>
+                    <select id="chat-q-2">
+                        <option value="the Hospital?">the Hospital?</option>
+                        <option value="the Bank?">the Bank?</option>
+                        <option value="the School?">the School?</option>
+                        <option value="the Park?">the Park?</option>
+                    </select>
+                    <button class="btn-cyan" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieQuestion()">SEND</button>
+                </div>
+
+                <div id="guide-chat-form" style="display: none;" class="walkie-inputs">
+                    <select id="chat-a-1">
+                        <option value="Go straight">Go straight</option>
+                        <option value="Turn left & go">Turn left & go</option>
+                        <option value="Turn right & go">Turn right & go</option>
+                    </select>
+                    <select id="chat-a-2">
+                        <option value="1">1 block.</option>
+                        <option value="2">2 blocks.</option>
+                        <option value="3">3 blocks.</option>
+                    </select>
+                    <button class="btn-yellow" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieAnswer()">SEND</button>
+                </div>
+            </div>
             
             <div class="grid-board" id="grid">
                 <div class="char-wrapper" id="player-wrapper" style="display:none;">
@@ -126,13 +178,24 @@
                 </div>
             </div>
 
-            <div class="controls" id="controls" style="display: none;">
-                <button style="background: var(--btn-forward)" onclick="moveChar('forward')">⬆️ Forward</button>
-                <button style="background: var(--btn-backward)" onclick="moveChar('backward')">⬇️ Backward</button>
-                <button style="background: var(--btn-left)" onclick="moveChar('left')">↩️ Turn Left</button>
-                <button style="background: var(--btn-right)" onclick="moveChar('right')">↪️ Turn Right</button>
+            <div id="explorer-controls" style="display: none; width: 100%;">
+                <div class="controls">
+                    <button id="btn-fwd" style="background: var(--btn-forward)" onclick="moveChar('forward')" disabled>⬆️ Forward</button>
+                    <button id="btn-bwd" style="background: var(--btn-backward)" onclick="moveChar('backward')" disabled>⬇️ Backward</button>
+                    <button id="btn-left" style="background: var(--btn-left)" onclick="moveChar('left')" disabled>↩️ Turn Left</button>
+                    <button id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')" disabled>↪️ Turn Right</button>
+                </div>
+                <button class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 10px;">✅ CHECK DESTINATION</button>
             </div>
-            <button class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 15px; display: none;">CHECK DESTINATION</button>
+        </div>
+    </div>
+
+    <div id="tollgate-modal" class="modal">
+        <div class="modal-box">
+            <h2>👮 Police Checkpoint</h2>
+            <p style="margin-top:0;">Stop! Talk to your guide and type the password to pass.</p>
+            <input type="text" id="tollgate-input" placeholder="Type password here" style="width: 80%; box-sizing: border-box;" autocomplete="off">
+            <button class="btn-yellow" onclick="submitTollgate()" style="width: 80%;">Unlock Road</button>
         </div>
     </div>
 
@@ -148,8 +211,7 @@
 
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">GAME OVER!</h2>
-        <div id="ending-results" class="result-box">
-            </div>
+        <div id="ending-results" class="result-box"></div>
         <button class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
@@ -168,30 +230,24 @@
         const db = firebase.database();
 
         let myId = "user_" + Math.floor(Math.random() * 10000);
-        let myName = "";
-        let myChar = "./char1.png";
-        let currentRoom = "";
-        let isHost = false;
-        let myTeam = "none";
-        let myRole = "";
-        let timerInterval = null;
-        let roundStartTime = 0;
-        let currentRound = 1;
+        let myName = ""; let myChar = "./char1.png"; let currentRoom = "";
+        let isHost = false; let myTeam = "none"; let myRole = "";
+        let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
 
-        // 양 팀 공통 고정 맵
+        // 7은 NPC 검문소 (중앙 교차로 길막)
         const mapData = [
             [2, 0, 0, 3, 4],
             [1, 3, 0, 1, 0],
-            [5, 0, 0, 0, 0],
+            [5, 0, 7, 0, 0], 
             [1, 0, 1, 3, 0],
             [0, 0, 0, 6, 1]
         ];
         
         const targets = [
-            { id: 2, name: "HOSPITAL", x: 0, y: 0 },
-            { id: 4, name: "SCHOOL", x: 4, y: 0 },
-            { id: 5, name: "BANK", x: 0, y: 2 },
-            { id: 6, name: "PARK", x: 3, y: 4 }
+            { id: 2, name: "HOSPITAL", x: 0, y: 0, pwd: "Where is the post office" },
+            { id: 4, name: "SCHOOL", x: 4, y: 0, pwd: "It is on your left" },
+            { id: 5, name: "BANK", x: 0, y: 2, pwd: "Go straight two blocks" },
+            { id: 6, name: "PARK", x: 3, y: 4, pwd: "Turn right at the corner" }
         ];
 
         function selectChar(imgName, element) {
@@ -203,17 +259,14 @@
         function login() {
             const nameInput = document.getElementById('nickname-input').value.trim();
             if(!nameInput) return alert("Please enter a nickname!");
-            myName = nameInput;
-            document.getElementById('display-name').innerText = myName;
+            myName = nameInput; document.getElementById('display-name').innerText = myName;
             switchScreen('lobby-screen');
         }
 
         function createRoom() {
-            currentRoom = Math.floor(1000 + Math.random() * 9000).toString();
-            isHost = true;
+            currentRoom = Math.floor(1000 + Math.random() * 9000).toString(); isHost = true;
             db.ref('rooms/' + currentRoom).set({ status: 'waiting', round: 1 }).then(() => {
-                joinDbRoom();
-                switchScreen('room-screen');
+                joinDbRoom(); switchScreen('room-screen');
                 document.getElementById('room-code-display').innerText = currentRoom;
                 document.getElementById('start-game-btn').style.display = 'block';
             });
@@ -222,9 +275,7 @@
         function joinRoom() {
             const code = document.getElementById('room-code-input').value.trim();
             if(code.length !== 4) return alert("Enter 4 digits!");
-            currentRoom = code;
-            joinDbRoom();
-            switchScreen('room-screen');
+            currentRoom = code; joinDbRoom(); switchScreen('room-screen');
             document.getElementById('room-code-display').innerText = currentRoom;
         }
 
@@ -232,33 +283,22 @@
             const playerRef = db.ref(`rooms/${currentRoom}/players/${myId}`);
             playerRef.set({ name: myName, charImg: myChar, team: 'none', ready: false });
 
-            // ★ DB 상태 변화 감지 핵심 로직 (라운지 / 게임 / 엔딩 스크린 전환)
             db.ref(`rooms/${currentRoom}`).on('value', (snapshot) => {
-                const data = snapshot.val();
-                if(!data) return;
+                const data = snapshot.val(); if(!data) return;
 
                 if(data.status === 'waiting') {
                     renderWaitingRoom(data.players);
-                } 
-                else if(data.status === 'playing' || data.status === 'round_end') {
-                    let myTeamFinished = false;
-                    if(myTeam !== 'none' && data.teams && data.teams[myTeam] && data.teams[myTeam].finished) {
-                        myTeamFinished = true;
-                    }
-
-                    // 내 팀이 완료했거나, 라운드가 완전히 종료된 경우 라운지 화면 표시
+                } else if(data.status === 'playing' || data.status === 'round_end') {
+                    let myTeamFinished = (myTeam !== 'none' && data.teams && data.teams[myTeam] && data.teams[myTeam].finished);
                     if(myTeamFinished || data.status === 'round_end') {
                         showRoundLounge(data);
                     } else {
-                        // 아직 우리팀이 안 끝났다면 게임 화면 유지
                         if(!document.getElementById('game-screen').classList.contains('active')){
-                            switchScreen('game-screen');
-                            startGameLogic(data);
+                            switchScreen('game-screen'); startGameLogic(data);
                         }
                         updateGameScreen(data);
                     }
-                } 
-                else if(data.status === 'game_over') {
+                } else if(data.status === 'game_over') {
                     showFinalEnding(data);
                 }
             });
@@ -267,8 +307,7 @@
         function renderWaitingRoom(players) {
             ['A', 'B', 'none'].forEach(t => document.getElementById(`team-${t}`).innerHTML = `<div class="team-title" style="color: ${t==='A'?'#ff007f':t==='B'?'#00f0ff':'white'};">TEAM ${t==='none'?'Waiting Area':t}</div>`);
             for(let id in players) {
-                const p = players[id];
-                const div = document.createElement('div');
+                const p = players[id]; const div = document.createElement('div');
                 div.className = 'player-card'; div.draggable = (id === myId); div.id = id; div.ondragstart = drag;
                 div.innerHTML = `<img src="${p.charImg}" alt="char"><span>${p.name} ${p.ready ? '✅' : ''}</span>`;
                 document.getElementById('team-' + p.team).appendChild(div);
@@ -287,30 +326,24 @@
             ref.once('value').then(s => ref.update({ ready: !s.val().ready }));
         }
 
-        function startGame() {
-            startRound(1);
-        }
+        function startGame() { startRound(1); }
 
         function startRound(roundNum) {
             db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
-                let d = snapshot.val();
-                
-                // ★ 활성화된 팀(실제 플레이어가 있는 팀)만 분류하여 세팅
-                let activeTeams = {};
+                let d = snapshot.val(); let activeTeams = {};
                 for(let pid in d.players) {
                     let pTeam = d.players[pid].team;
                     if(pTeam === 'A' || pTeam === 'B') activeTeams[pTeam] = true;
                 }
-
                 const rData = { status: 'playing', round: roundNum, startTime: Date.now() };
                 ['A', 'B'].forEach(t => {
                     if(activeTeams[t]) {
-                        rData[`teams/${t}/charX`] = 4;
-                        rData[`teams/${t}/charY`] = 4;
-                        rData[`teams/${t}/charDir`] = 0;
-                        rData[`teams/${t}/path`] = "4,4";
-                        rData[`teams/${t}/finished`] = false;
-                        rData[`teams/${t}/currentRoundTime`] = 0;
+                        rData[`teams/${t}/charX`] = 4; rData[`teams/${t}/charY`] = 4;
+                        rData[`teams/${t}/charDir`] = 0; rData[`teams/${t}/path`] = "4,4";
+                        rData[`teams/${t}/finished`] = false; rData[`teams/${t}/currentRoundTime`] = 0;
+                        rData[`teams/${t}/chat`] = "Waiting for communication..."; // 채팅 초기화
+                        rData[`teams/${t}/movesLeft`] = 0; // 초기 이동력 0
+                        rData[`teams/${t}/tollgateCleared`] = false; // 검문소 초기화
                     }
                 });
                 db.ref(`rooms/${currentRoom}`).update(rData);
@@ -318,71 +351,64 @@
         }
 
         function startGameLogic(data) {
-            currentRound = data.round;
-            document.getElementById('round-info').innerText = `Round ${currentRound}/4`;
-            
-            roundStartTime = data.startTime;
-            if(timerInterval) clearInterval(timerInterval);
+            currentRound = data.round; document.getElementById('round-info').innerText = `Round ${currentRound}/4`;
+            roundStartTime = data.startTime; if(timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(updateTimer, 1000);
 
-            // 역할 교대 완벽 연동
             let myTeamPlayers = [];
-            for(let id in data.players) { 
-                if(data.players[id].team === myTeam) {
-                    myTeamPlayers.push({id: id, ...data.players[id]}); 
-                }
-            }
+            for(let id in data.players) { if(data.players[id].team === myTeam) myTeamPlayers.push({id: id, ...data.players[id]}); }
             myTeamPlayers.sort((a,b) => a.id.localeCompare(b.id));
-            
             let explorerData = null;
 
-            if(myTeam === 'none' || myTeamPlayers.length === 0) {
-                myRole = 'Spectator';
-            } else if(myTeamPlayers.length > 1) {
-                if(currentRound % 2 !== 0) { // 홀수 라운드
-                    myRole = (myId === myTeamPlayers[0].id) ? 'Guide' : 'Explorer';
-                    explorerData = myTeamPlayers[1];
-                } else { // 짝수 라운드
-                    myRole = (myId === myTeamPlayers[0].id) ? 'Explorer' : 'Guide';
-                    explorerData = myTeamPlayers[0];
+            if(myTeam === 'none' || myTeamPlayers.length === 0) { myRole = 'Spectator'; } 
+            else if(myTeamPlayers.length > 1) {
+                if(currentRound % 2 !== 0) {
+                    myRole = (myId === myTeamPlayers[0].id) ? 'Guide' : 'Explorer'; explorerData = myTeamPlayers[1];
+                } else {
+                    myRole = (myId === myTeamPlayers[0].id) ? 'Explorer' : 'Guide'; explorerData = myTeamPlayers[0];
                 }
             } else {
-                myRole = 'Explorer';
-                explorerData = myTeamPlayers[0];
+                myRole = 'Explorer'; explorerData = myTeamPlayers[0];
             }
 
             document.getElementById('role-display').innerText = myRole === 'Guide' ? "You: GUIDE (Map Reader)" : "You: EXPLORER (Blind Walker)";
 
             const grid = document.getElementById('grid');
             document.querySelectorAll('.cell').forEach(e => e.remove());
-
             const targetObj = targets[currentRound - 1];
 
+            // 가이드 & 탐험가 UI 분기
             if(myRole === 'Guide' || myRole === 'Spectator') {
-                document.getElementById('dest-display').innerText = "Guide them to their destination!";
-                document.getElementById('controls').style.display = 'none';
-                document.getElementById('check-btn').style.display = 'none';
+                document.getElementById('guide-info-panel').style.display = 'block';
+                document.getElementById('guide-target-display').innerText = targetObj.name;
+                document.getElementById('explorer-controls').style.display = 'none';
+                
+                document.getElementById('explorer-chat-form').style.display = 'none';
+                document.getElementById('guide-chat-form').style.display = 'flex';
 
                 for(let y=0; y<5; y++) {
                     for(let x=0; x<5; x++) {
-                        let cell = document.createElement('div');
-                        cell.className = 'cell'; cell.id = `cell-${x}-${y}`;
+                        let cell = document.createElement('div'); cell.className = 'cell'; cell.id = `cell-${x}-${y}`;
                         if(mapData[y][x] === 0) cell.classList.add('road');
                         if(mapData[y][x] === 3) { cell.innerText = '🪨'; cell.classList.add('obstacle-cell'); }
                         if(mapData[y][x] === 2) { cell.innerText = '🏥'; cell.classList.add('building-cell'); }
                         if(mapData[y][x] === 4) { cell.innerText = '🏫'; cell.classList.add('building-cell'); }
                         if(mapData[y][x] === 5) { cell.innerText = '🏦'; cell.classList.add('building-cell'); }
                         if(mapData[y][x] === 6) { cell.innerText = '🌲'; cell.classList.add('building-cell'); }
+                        if(mapData[y][x] === 7) { cell.innerText = '👮'; cell.classList.add('tollgate-cell'); }
                         grid.appendChild(cell);
                     }
                 }
             } else {
-                document.getElementById('dest-display').innerText = `Target: ${targetObj.name} ${targetObj.emoji||''}`;
-                document.getElementById('controls').style.display = 'grid';
-                document.getElementById('check-btn').style.display = 'block';
+                document.getElementById('guide-info-panel').style.display = 'none';
+                document.getElementById('explorer-controls').style.display = 'block';
+                
+                document.getElementById('explorer-chat-form').style.display = 'flex';
+                document.getElementById('guide-chat-form').style.display = 'none';
+                document.getElementById('moves-badge').style.display = 'inline-block';
+
                 for(let i=0; i<25; i++) {
-                    let cell = document.createElement('div');
-                    cell.className = 'cell'; cell.style.background = 'white';
+                    let cell = document.createElement('div'); cell.className = 'cell'; cell.style.background = 'white';
                     grid.appendChild(cell);
                 }
             }
@@ -392,55 +418,96 @@
                 wrapper.style.display = 'flex';
                 document.getElementById('player-sprite').src = explorerData.charImg;
                 document.getElementById('player-name-tag').innerText = explorerData.name;
-            } else {
-                wrapper.style.display = 'none';
-            }
+            } else { wrapper.style.display = 'none'; }
         }
 
+        // 실시간 업데이트 (무전기 내용, 이동력, 검문소, 위치)
         function updateGameScreen(data) {
             if(myTeam === 'none' || !data.teams || !data.teams[myTeam]) return;
             const tData = data.teams[myTeam];
             
+            // 위치 업데이트
             const wrapper = document.getElementById('player-wrapper');
             const sprite = document.getElementById('player-sprite');
-            
             if(wrapper && tData.charX !== undefined) {
-                wrapper.style.transform = `translate(${tData.charX * 62}px, ${tData.charY * 62}px)`;
+                wrapper.style.transform = `translate(${tData.charX * 57}px, ${tData.charY * 57}px)`;
                 sprite.style.transform = `rotate(${tData.charDir * 90}deg)`;
             }
 
+            // 가이드 경로 업데이트
             if(myRole === 'Guide' && tData.path) {
                 document.querySelectorAll('.path-dot').forEach(e => e.remove());
                 const pathArr = tData.path.split('|');
                 pathArr.forEach(p => {
                     const [px, py] = p.split(',');
                     const cell = document.getElementById(`cell-${px}-${py}`);
-                    if(cell) {
-                        let dot = document.createElement('div');
-                        dot.className = 'path-dot';
-                        cell.appendChild(dot);
-                    }
+                    if(cell) { let dot = document.createElement('div'); dot.className = 'path-dot'; cell.appendChild(dot); }
                 });
+            }
+
+            // 무전기(채팅) 업데이트
+            if(tData.chat) {
+                document.getElementById('chat-display').innerHTML = tData.chat;
+            }
+
+            // 탐험가 조종 패널 활성/비활성 제어 (이동력 기준)
+            if(myRole === 'Explorer') {
+                const moves = tData.movesLeft || 0;
+                document.getElementById('moves-badge').innerText = `Moves: ${moves}`;
+                const btns = document.querySelectorAll('#explorer-controls button:not(#check-btn)');
+                if(moves > 0) {
+                    btns.forEach(b => b.disabled = false);
+                } else {
+                    btns.forEach(b => b.disabled = true);
+                }
+            }
+
+            // 가이드 검문소 암호 노출 제어
+            if(myRole === 'Guide') {
+                const pwdDisplay = document.getElementById('tollgate-password-display');
+                if(!tData.tollgateCleared && tData.charX === 2 && tData.charY === 2) {
+                    // 탐험가가 2,2(검문소)에 도착하면 가이드 화면에 암호가 번쩍임
+                    pwdDisplay.style.display = 'block';
+                    document.getElementById('secret-word').innerText = targets[currentRound-1].pwd;
+                } else {
+                    pwdDisplay.style.display = 'none';
+                }
             }
         }
 
-        // 초 단위를 분:초로 보기 좋게 변환
-        function formatTime(seconds) {
-            let m = String(Math.floor(seconds / 60)).padStart(2, '0');
-            let s = String(seconds % 60).padStart(2, '0');
-            return `${m}:${s}`;
+        // --- 무전기 발송 로직 ---
+        function sendWalkieQuestion() {
+            const q1 = document.getElementById('chat-q-1').value;
+            const q2 = document.getElementById('chat-q-2').value;
+            const msg = `🧑‍🚀 Explorer: "${q1} ${q2}"`;
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chat: msg });
         }
 
-        function updateTimer() {
-            let elapsed = Math.floor((Date.now() - roundStartTime) / 1000);
-            document.getElementById('timer-display').innerText = formatTime(elapsed);
+        function sendWalkieAnswer() {
+            const a1 = document.getElementById('chat-a-1').value;
+            const a2 = document.getElementById('chat-a-2').value;
+            const moves = parseInt(a2); // 1, 2, 3 블록
+            const msg = `🗺️ Guide: "${a1} ${a2}"`;
+            
+            // 답변 시 채팅창 갱신 및 탐험가에게 이동력 부여
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
+                let currentMoves = snap.val().movesLeft || 0;
+                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                    chat: msg,
+                    movesLeft: currentMoves + moves // 누적
+                });
+            });
         }
 
+        // --- 조종 및 검문소(Tollgate) 로직 ---
         function moveChar(action) {
             if (myRole !== 'Explorer') return; 
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snapshot => {
                 let d = snapshot.val();
                 let nx = d.charX, ny = d.charY, nd = d.charDir;
+                let mLeft = d.movesLeft || 0;
+
+                if(mLeft <= 0) return; // 이동력 없으면 취소
 
                 if(action === 'left') nd = (nd + 3) % 4;
                 if(action === 'right') nd = (nd + 1) % 4;
@@ -449,9 +516,22 @@
                     if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
                 }
 
+                // 이동 가능 여부 체크
                 if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && mapData[ny][nx] !== 3) {
+                    
+                    // 7번 타일(검문소) 충돌 체크
+                    if(mapData[ny][nx] === 7 && !d.tollgateCleared) {
+                        // 위치는 업데이트하지만, 모달을 띄우고 조종을 막음
+                        let newPath = d.path + `|${nx},${ny}`;
+                        db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 }).then(() => {
+                            document.getElementById('tollgate-modal').style.display = 'flex';
+                        });
+                        return;
+                    }
+
+                    // 일반 이동
                     let newPath = d.path + `|${nx},${ny}`;
-                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath });
+                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 });
                 } else {
                     const sprite = document.getElementById('player-sprite');
                     sprite.style.filter = 'drop-shadow(0 0 10px red)';
@@ -460,68 +540,87 @@
             });
         }
 
+        // 검문소 암호 제출
+        function submitTollgate() {
+            const inputVal = document.getElementById('tollgate-input').value.trim().toLowerCase();
+            const correctPwd = targets[currentRound-1].pwd.toLowerCase();
+
+            // 대소문자 무시, 마침표나 특수문자는 치고 안치고 허용을 위해 단순 포함/비교 (여기선 일치로 검사)
+            if(inputVal.replace(/[?.!]/g, '') === correctPwd.replace(/[?.!]/g, '')) {
+                alert("Correct! The road is clear.");
+                document.getElementById('tollgate-modal').style.display = 'none';
+                document.getElementById('tollgate-input').value = "";
+                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ tollgateCleared: true });
+            } else {
+                alert("Wrong password! Listen to your guide.");
+            }
+        }
+
+        function formatTime(seconds) {
+            let m = String(Math.floor(seconds / 60)).padStart(2, '0'); let s = String(seconds % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function updateTimer() {
+            let elapsed = Math.floor((Date.now() - roundStartTime) / 1000);
+            document.getElementById('timer-display').innerText = formatTime(elapsed);
+        }
+
         function checkWin() {
             if (myRole !== 'Explorer') return;
             db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
-                let d = snapshot.val();
-                let tData = d.teams[myTeam];
+                let d = snapshot.val(); let tData = d.teams[myTeam];
                 const targetObj = targets[d.round - 1];
 
                 if(tData.charX === targetObj.x && tData.charY === targetObj.y) {
-                    // ★ 정답일 경우: 해당 팀의 타이머를 멈추고 라운드 기록 저장
                     let roundTime = Math.floor((Date.now() - d.startTime) / 1000);
                     let newTotalTime = (tData.totalTime || 0) + roundTime;
-
-                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
-                        finished: true, 
-                        currentRoundTime: roundTime,
-                        totalTime: newTotalTime
-                    }).then(() => {
-                        checkAllTeamsFinished(currentRoom);
-                    });
+                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ finished: true, currentRoundTime: roundTime, totalTime: newTotalTime }).then(() => { checkAllTeamsFinished(currentRoom); });
                 } else {
-                    alert("Wrong place! Talk to your guide!");
+                    alert("Wrong place! Use the walkie-talkie!");
                 }
             });
         }
 
         function checkAllTeamsFinished(roomId) {
             db.ref(`rooms/${roomId}`).once('value').then(snapshot => {
-                let d = snapshot.val();
-                let allFinished = true;
-                
-                // 실제 플레이어가 존재하는 활성 팀만 추출
-                let activeTeams = [];
-                for(let pid in d.players) {
-                    let t = d.players[pid].team;
-                    if((t === 'A' || t === 'B') && !activeTeams.includes(t)) activeTeams.push(t);
-                }
-
-                // 활성 팀들이 모두 finished 상태인지 확인
-                activeTeams.forEach(t => {
-                    if(!d.teams || !d.teams[t] || !d.teams[t].finished) {
-                        allFinished = false;
-                    }
-                });
-
-                if(allFinished) {
-                    let nextStatus = d.round >= 4 ? 'game_over' : 'round_end';
-                    db.ref(`rooms/${roomId}`).update({ status: nextStatus });
-                }
+                let d = snapshot.val(); let allFinished = true; let activeTeams = [];
+                for(let pid in d.players) { let t = d.players[pid].team; if((t === 'A' || t === 'B') && !activeTeams.includes(t)) activeTeams.push(t); }
+                activeTeams.forEach(t => { if(!d.teams || !d.teams[t] || !d.teams[t].finished) { allFinished = false; } });
+                if(allFinished) { let nextStatus = d.round >= 4 ? 'game_over' : 'round_end'; db.ref(`rooms/${roomId}`).update({ status: nextStatus }); }
             });
         }
 
-        // 라운지 화면 (팀 개별 대기 공간)
         function showRoundLounge(data) {
-            switchScreen('lounge-screen');
-            clearInterval(timerInterval); // 해당 팀의 시계 정지
-            
+            switchScreen('lounge-screen'); clearInterval(timerInterval);
             document.getElementById('lounge-title').innerText = `Round ${data.round} Cleared!`;
-
             if(myTeam !== 'none' && data.teams && data.teams[myTeam]) {
-                let myTime = data.teams[myTeam].currentRoundTime;
-                document.getElementById('lounge-my-time').innerText = formatTime(myTime);
+                let myTime = data.teams[myTeam].currentRoundTime; document.getElementById('lounge-my-time').innerText = formatTime(myTime);
             }
-
             if(data.status === 'round_end') {
-                document.getElementById('lounge-status').innerText =
+                document.getElementById('lounge-status').innerText = "All teams have finished!";
+                if(isHost) { document.getElementById('lounge-next-btn').style.display = 'block'; document.getElementById('lounge-next-btn').onclick = () => startRound(data.round + 1); } 
+                else { document.getElementById('lounge-next-btn').style.display = 'none'; }
+            } else {
+                document.getElementById('lounge-status').innerText = "Waiting for the other team..."; document.getElementById('lounge-next-btn').style.display = 'none';
+            }
+        }
+
+        function showFinalEnding(data) {
+            switchScreen('ending-screen'); clearInterval(timerInterval);
+            let html = "<h3 style='color: white; font-size: 2rem; margin-top: 0;'>Final Time Records</h3>";
+            ['A', 'B'].forEach(t => {
+                if(data.teams && data.teams[t] && data.teams[t].totalTime !== undefined) {
+                    let color = t === 'A' ? '#ff007f' : '#00f0ff';
+                    html += `<p style="font-size:2rem; font-weight:bold; color:${color}; margin: 10px 0;">TEAM ${t}: ${formatTime(data.teams[t].totalTime)}</p>`;
+                }
+            });
+            document.getElementById('ending-results').innerHTML = html;
+        }
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById(screenId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
