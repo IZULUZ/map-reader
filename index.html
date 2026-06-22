@@ -45,7 +45,6 @@
         .grid-board { display: grid; grid-template-columns: repeat(5, 60px); grid-template-rows: repeat(5, 60px); gap: 2px; background: black; border: 4px solid black; position: relative; }
         .cell { width: 60px; height: 60px; background-color: var(--grid-grass); display: flex; justify-content: center; align-items: center; font-size: 2rem; position: relative; }
         
-        /* 맵 요소 절대경로(./) 추가로 인식률 높임 */
         .road { background-color: var(--grid-road); background-image: url('./road.png'); background-size: cover; }
         .obstacle-cell { background-image: url('./obstacle.png'); background-size: cover; }
         .building-cell { position: relative; background-size: cover; }
@@ -60,8 +59,8 @@
         #dest-display { font-family: 'Fredoka One'; font-size: 1.5rem; color: #ff007f; margin-bottom: 10px; background: white; padding: 5px 15px; border-radius: 10px; border: 3px solid black; text-align: center; width: 100%; box-sizing: border-box;}
         #role-display { color: yellow; margin: 5px 0; text-align: center; }
 
-        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center;}
-        .modal-box { background: white; color: black; border: 5px solid #ff007f; border-radius: 20px; padding: 30px; width: 80%; max-width: 400px; font-family: 'Fredoka One'; }
+        /* 결과 표시용 라운지 박스 */
+        .result-box { background: rgba(255,255,255,0.1); border: 4px dashed white; border-radius: 20px; padding: 20px; text-align: center; width: 100%; max-width: 400px; margin-top: 20px;}
     </style>
 </head>
 <body>
@@ -137,12 +136,21 @@
         </div>
     </div>
 
-    <div id="modal" class="modal">
-        <div class="modal-box">
-            <h2 id="modal-title" style="color: #ff007f;">Round Cleared!</h2>
-            <p id="modal-desc" style="font-size: 1.2rem;"></p>
-            <button class="btn-cyan" id="next-round-btn" onclick="readyNextRound()" style="display: none; margin-top: 15px; width: 100%;">Next Round Ready</button>
+    <div id="lounge-screen" class="screen">
+        <h2 id="lounge-title" style="color: #39ff14; font-size: 3rem;">Round Cleared!</h2>
+        <div class="result-box">
+            <h3 style="color: white; font-size: 1.5rem; margin-top: 0;">Our Team's Record</h3>
+            <p id="lounge-my-time" style="color: yellow; font-size: 3rem; margin: 10px 0;">00:00</p>
         </div>
+        <p id="lounge-status" style="font-size: 1.2rem; margin-top: 30px;">Waiting for the other team...</p>
+        <button class="btn-cyan" id="lounge-next-btn" style="display: none; margin-top: 20px; font-size: 1.5rem;">START NEXT ROUND</button>
+    </div>
+
+    <div id="ending-screen" class="screen">
+        <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">GAME OVER!</h2>
+        <div id="ending-results" class="result-box">
+            </div>
+        <button class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
     <script>
@@ -170,6 +178,7 @@
         let roundStartTime = 0;
         let currentRound = 1;
 
+        // 양 팀 공통 고정 맵
         const mapData = [
             [2, 0, 0, 3, 4],
             [1, 3, 0, 1, 0],
@@ -223,21 +232,34 @@
             const playerRef = db.ref(`rooms/${currentRoom}/players/${myId}`);
             playerRef.set({ name: myName, charImg: myChar, team: 'none', ready: false });
 
+            // ★ DB 상태 변화 감지 핵심 로직 (라운지 / 게임 / 엔딩 스크린 전환)
             db.ref(`rooms/${currentRoom}`).on('value', (snapshot) => {
                 const data = snapshot.val();
                 if(!data) return;
 
                 if(data.status === 'waiting') {
                     renderWaitingRoom(data.players);
-                } else if(data.status === 'playing') {
-                    document.getElementById('modal').style.display = 'none';
-                    if(!document.getElementById('game-screen').classList.contains('active')){
-                        switchScreen('game-screen');
-                        startGameLogic(data);
+                } 
+                else if(data.status === 'playing' || data.status === 'round_end') {
+                    let myTeamFinished = false;
+                    if(myTeam !== 'none' && data.teams && data.teams[myTeam] && data.teams[myTeam].finished) {
+                        myTeamFinished = true;
                     }
-                    updateGameScreen(data);
-                } else if(data.status === 'round_end' || data.status === 'game_over') {
-                    showRoundEnd(data);
+
+                    // 내 팀이 완료했거나, 라운드가 완전히 종료된 경우 라운지 화면 표시
+                    if(myTeamFinished || data.status === 'round_end') {
+                        showRoundLounge(data);
+                    } else {
+                        // 아직 우리팀이 안 끝났다면 게임 화면 유지
+                        if(!document.getElementById('game-screen').classList.contains('active')){
+                            switchScreen('game-screen');
+                            startGameLogic(data);
+                        }
+                        updateGameScreen(data);
+                    }
+                } 
+                else if(data.status === 'game_over') {
+                    showFinalEnding(data);
                 }
             });
         }
@@ -266,20 +288,33 @@
         }
 
         function startGame() {
-            // 아무 팀에도 속하지 않은 유저가 있는지 체크 방지 (원하시면 추가 가능)
             startRound(1);
         }
 
         function startRound(roundNum) {
-            const rData = { status: 'playing', round: roundNum, startTime: Date.now() };
-            ['A', 'B'].forEach(t => {
-                rData[`teams/${t}/charX`] = 4;
-                rData[`teams/${t}/charY`] = 4;
-                rData[`teams/${t}/charDir`] = 0;
-                rData[`teams/${t}/path`] = "4,4";
-                rData[`teams/${t}/finished`] = false;
+            db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
+                let d = snapshot.val();
+                
+                // ★ 활성화된 팀(실제 플레이어가 있는 팀)만 분류하여 세팅
+                let activeTeams = {};
+                for(let pid in d.players) {
+                    let pTeam = d.players[pid].team;
+                    if(pTeam === 'A' || pTeam === 'B') activeTeams[pTeam] = true;
+                }
+
+                const rData = { status: 'playing', round: roundNum, startTime: Date.now() };
+                ['A', 'B'].forEach(t => {
+                    if(activeTeams[t]) {
+                        rData[`teams/${t}/charX`] = 4;
+                        rData[`teams/${t}/charY`] = 4;
+                        rData[`teams/${t}/charDir`] = 0;
+                        rData[`teams/${t}/path`] = "4,4";
+                        rData[`teams/${t}/finished`] = false;
+                        rData[`teams/${t}/currentRoundTime`] = 0;
+                    }
+                });
+                db.ref(`rooms/${currentRoom}`).update(rData);
             });
-            db.ref(`rooms/${currentRoom}`).update(rData);
         }
 
         function startGameLogic(data) {
@@ -290,30 +325,29 @@
             if(timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(updateTimer, 1000);
 
-            // [수정된 핵심 로직] 내 팀의 플레이어들만 모아서 역할을 정확히 분리합니다.
+            // 역할 교대 완벽 연동
             let myTeamPlayers = [];
             for(let id in data.players) { 
                 if(data.players[id].team === myTeam) {
                     myTeamPlayers.push({id: id, ...data.players[id]}); 
                 }
             }
-            myTeamPlayers.sort((a,b) => a.id.localeCompare(b.id)); // 항상 동일한 순서 정렬
+            myTeamPlayers.sort((a,b) => a.id.localeCompare(b.id));
             
             let explorerData = null;
 
             if(myTeam === 'none' || myTeamPlayers.length === 0) {
-                myRole = 'Spectator'; // 관전자
+                myRole = 'Spectator';
             } else if(myTeamPlayers.length > 1) {
-                // 라운드가 홀수면 0번이 가이드, 1번이 탐험가. 짝수면 반대.
-                if(currentRound % 2 !== 0) {
+                if(currentRound % 2 !== 0) { // 홀수 라운드
                     myRole = (myId === myTeamPlayers[0].id) ? 'Guide' : 'Explorer';
-                    explorerData = myTeamPlayers[1]; // 탐험가 데이터
-                } else {
+                    explorerData = myTeamPlayers[1];
+                } else { // 짝수 라운드
                     myRole = (myId === myTeamPlayers[0].id) ? 'Explorer' : 'Guide';
-                    explorerData = myTeamPlayers[0]; // 탐험가 데이터
+                    explorerData = myTeamPlayers[0];
                 }
             } else {
-                myRole = 'Explorer'; // 혼자일 경우 테스트용
+                myRole = 'Explorer';
                 explorerData = myTeamPlayers[0];
             }
 
@@ -353,7 +387,6 @@
                 }
             }
 
-            // 캐릭터 이름 및 이미지 세팅 (내 팀의 탐험가 닉네임만 표시)
             const wrapper = document.getElementById('player-wrapper');
             if (explorerData) {
                 wrapper.style.display = 'flex';
@@ -391,15 +424,20 @@
             }
         }
 
+        // 초 단위를 분:초로 보기 좋게 변환
+        function formatTime(seconds) {
+            let m = String(Math.floor(seconds / 60)).padStart(2, '0');
+            let s = String(seconds % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
         function updateTimer() {
             let elapsed = Math.floor((Date.now() - roundStartTime) / 1000);
-            let m = String(Math.floor(elapsed / 60)).padStart(2, '0');
-            let s = String(elapsed % 60).padStart(2, '0');
-            document.getElementById('timer-display').innerText = `${m}:${s}`;
+            document.getElementById('timer-display').innerText = formatTime(elapsed);
         }
 
         function moveChar(action) {
-            if (myRole !== 'Explorer') return; // 탐험가만 조작 가능
+            if (myRole !== 'Explorer') return; 
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snapshot => {
                 let d = snapshot.val();
                 let nx = d.charX, ny = d.charY, nd = d.charDir;
@@ -430,8 +468,15 @@
                 const targetObj = targets[d.round - 1];
 
                 if(tData.charX === targetObj.x && tData.charY === targetObj.y) {
-                    let finalTime = Math.floor((Date.now() - d.startTime) / 1000);
-                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ finished: true, time: finalTime }).then(() => {
+                    // ★ 정답일 경우: 해당 팀의 타이머를 멈추고 라운드 기록 저장
+                    let roundTime = Math.floor((Date.now() - d.startTime) / 1000);
+                    let newTotalTime = (tData.totalTime || 0) + roundTime;
+
+                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                        finished: true, 
+                        currentRoundTime: roundTime,
+                        totalTime: newTotalTime
+                    }).then(() => {
                         checkAllTeamsFinished(currentRoom);
                     });
                 } else {
@@ -445,10 +490,17 @@
                 let d = snapshot.val();
                 let allFinished = true;
                 
-                ['A', 'B'].forEach(t => {
-                    // 팀 데이터가 존재하고 한 번이라도 이동한 흔적이 있는 활성 팀만 체크
-                    if(d.teams && d.teams[t] && d.teams[t].charX !== undefined) {
-                        if(!d.teams[t].finished) allFinished = false;
+                // 실제 플레이어가 존재하는 활성 팀만 추출
+                let activeTeams = [];
+                for(let pid in d.players) {
+                    let t = d.players[pid].team;
+                    if((t === 'A' || t === 'B') && !activeTeams.includes(t)) activeTeams.push(t);
+                }
+
+                // 활성 팀들이 모두 finished 상태인지 확인
+                activeTeams.forEach(t => {
+                    if(!d.teams || !d.teams[t] || !d.teams[t].finished) {
+                        allFinished = false;
                     }
                 });
 
@@ -459,38 +511,17 @@
             });
         }
 
-        function showRoundEnd(data) {
-            clearInterval(timerInterval);
-            document.getElementById('modal').style.display = 'flex';
+        // 라운지 화면 (팀 개별 대기 공간)
+        function showRoundLounge(data) {
+            switchScreen('lounge-screen');
+            clearInterval(timerInterval); // 해당 팀의 시계 정지
             
-            let desc = "";
-            if(data.teams && data.teams['A'] && data.teams['A'].time) {
-                desc += `Team A Time: ${data.teams['A'].time} seconds<br>`;
-            }
-            if(data.teams && data.teams['B'] && data.teams['B'].time) {
-                desc += `Team B Time: ${data.teams['B'].time} seconds<br>`;
+            document.getElementById('lounge-title').innerText = `Round ${data.round} Cleared!`;
+
+            if(myTeam !== 'none' && data.teams && data.teams[myTeam]) {
+                let myTime = data.teams[myTeam].currentRoundTime;
+                document.getElementById('lounge-my-time').innerText = formatTime(myTime);
             }
 
-            if(data.status === 'game_over') {
-                document.getElementById('modal-title').innerText = "All 4 Rounds Complete!";
-                document.getElementById('modal-title').style.color = "#39ff14";
-                document.getElementById('modal-desc').innerHTML = `<h3>Final Records</h3>${desc}`;
-                document.getElementById('next-round-btn').style.display = 'none';
-            } else {
-                document.getElementById('modal-title').innerText = `Round ${data.round} Cleared!`;
-                document.getElementById('modal-desc').innerHTML = desc + `<br><span style="font-size:0.9rem; color:yellow;">Roles will swap next round!</span>`;
-                
-                if(isHost) {
-                    document.getElementById('next-round-btn').style.display = 'block';
-                    document.getElementById('next-round-btn').onclick = () => startRound(data.round + 1);
-                }
-            }
-        }
-
-        function switchScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-    </script>
-</body>
-</html>
+            if(data.status === 'round_end') {
+                document.getElementById('lounge-status').innerText =
