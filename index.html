@@ -13,10 +13,11 @@
             --bg: #2d004b; --grid-road: #dcdcdc; --grid-grass: #c1f0c1;
             --btn-forward: #00f0ff; --btn-backward: #ffb3d9; --btn-right: #ffeb3b; --btn-left: #ff8c00;
         }
-        body { margin: 0; font-family: 'Nunito', sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; user-select: none; }
+        /* 모바일/태블릿 잘림 방지를 위해 overflow 고정 해제 및 최소 높이 지정 */
+        body { margin: 0; font-family: 'Nunito', sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-y: auto; padding-bottom: 40px; box-sizing: border-box; user-select: none; }
         h1 { font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: #ff007f; text-shadow: 2px 2px white, 4px 4px #00f0ff; margin: 5px 0; }
         
-        .screen { display: none; width: 100%; max-width: 1000px; height: 100%; flex-direction: column; align-items: center; padding: 10px; box-sizing: border-box; }
+        .screen { display: none; width: 100%; max-width: 1000px; flex-direction: column; align-items: center; padding: 10px; box-sizing: border-box; }
         .active { display: flex; }
 
         button { font-family: 'Fredoka One', cursive; font-size: 1.2rem; padding: 12px 20px; border: 4px solid black; border-radius: 15px; cursor: pointer; box-shadow: 4px 4px black; transition: transform 0.1s; }
@@ -26,6 +27,7 @@
         .btn-pink { background-color: #ff007f; color: white; }
         .btn-cyan { background-color: #00f0ff; color: black; }
         .btn-yellow { background-color: #ffeb3b; color: black; }
+        .btn-red { background-color: #ff4444; color: white; }
 
         input, select { font-family: 'Nunito', sans-serif; font-size: 1.2rem; padding: 10px; border: 4px solid black; border-radius: 10px; text-align: center; margin-bottom: 10px; }
         
@@ -35,7 +37,7 @@
         .char-option img { width: 100%; height: 100%; object-fit: contain; }
         
         .team-container { display: flex; gap: 20px; width: 100%; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
-        .team-box { width: 280px; min-height: 150px; border: 4px dashed white; border-radius: 20px; padding: 10px; background: rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .team-box { width: 280px; min-height: 150px; border: 4px dashed white; border-radius: 20px; padding: 10px; background: rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 10px; align-items: center; position: relative; }
         .team-title { font-family: 'Fredoka One'; font-size: 1.5rem; text-align: center; margin-bottom: 5px; }
         .player-card { background: white; color: black; border: 3px solid black; border-radius: 10px; padding: 5px 10px; width: 85%; cursor: grab; display: flex; align-items: center; gap: 10px; font-weight: 900; }
         .player-card img { width: 35px; height: 35px; object-fit: contain; background: #eee; border-radius: 5px; }
@@ -44,7 +46,6 @@
         .timer { color: #ff007f; font-size: 1.5rem; }
         
         .board-section { display: flex; flex-direction: column; align-items: center; background: #fff9e6; border: 4px solid black; border-radius: 20px; padding: 15px; width: 100%; max-width: 500px; box-sizing: border-box;}
-        
         #target-banner { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.3rem; color: #ff007f; background: white; padding: 5px 15px; border-radius: 10px; border: 3px solid black; margin-bottom: 10px; text-align: center; width: 100%; box-sizing: border-box; }
         
         .grid-board { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 2px; background: black; border: 4px solid black; position: relative; margin-bottom: 10px;}
@@ -90,8 +91,7 @@
         .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center;}
         .modal-box { background: white; color: black; border: 5px solid #ff007f; border-radius: 20px; padding: 20px; width: 85%; max-width: 600px; font-family: 'Fredoka One'; max-height: 80vh; overflow-y: auto;}
         
-        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 5px 0; display: none; text-align: center;}
-        
+        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 10px 0; display: none; text-align: center;}
         .howto-section { text-align: left; margin-bottom: 20px; padding: 10px; border-left: 5px solid #00f0ff; background: #f0f0f0; border-radius: 0 10px 10px 0;}
     </style>
 </head>
@@ -108,7 +108,7 @@
             <div class="char-option selected" onclick="selectChar('char1.png', this)"><img src="char1.png" alt="" onerror="this.style.display='none'"></div>
             <div class="char-option" onclick="selectChar('char2.png', this)"><img src="char2.png" alt="" onerror="this.style.display='none'"></div>
             <div class="char-option" onclick="selectChar('char3.png', this)"><img src="char3.png" alt="" onerror="this.style.display='none'"></div>
-            <div class="char-option" onclick="selectChar('char4.png', this)"><img src="char4.png" alt="" onerror="this.style.display='none'"></div>
+            <div class="char-option" onclick="char4.png', this)"><img src="char4.png" alt="" onerror="this.style.display='none'"></div>
             <div class="char-option" onclick="selectChar('char5.png', this)"><img src="char5.png" alt="" onerror="this.style.display='none'"></div>
         </div>
 
@@ -131,7 +131,11 @@
     </div>
 
     <div id="room-screen" class="screen">
-        <h2>Room Code: <span id="room-code-display" style="color:#39ff14; font-size: 3rem;"></span></h2>
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <button class="btn-red" style="padding: 8px 15px; font-size: 1rem;" onclick="leaveRoom()">◀ Leave Room</button>
+            <h2>Room Code: <span id="room-code-display" style="color:#39ff14; font-size: 2.5rem;"></span></h2>
+            <div style="width:100px;"></div>
+        </div>
         <p>Drag your character card to pick a team!</p>
         <div class="team-container">
             <div class="team-box" id="team-A" ondragover="allowDrop(event)" ondrop="drop(event, 'A')"><div class="team-title" style="color: #ff007f;">TEAM A</div></div>
@@ -152,7 +156,6 @@
         <h3 id="role-display" style="margin: 0 0 5px 0;"></h3>
         
         <div class="board-section" id="my-board-section">
-            
             <div id="target-banner">Situation: <span id="target-name">Wait...</span></div>
             <div id="tollgate-password-display">Password: <span id="secret-word"></span></div>
 
@@ -165,7 +168,6 @@
                 
                 <div class="chat-history" id="chat-display"></div>
                 
-                <!-- Explorer Chat Form -->
                 <div id="explorer-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-q-1">
                         <option value="How can I get to">How can I get to</option>
@@ -180,7 +182,6 @@
                     <button class="btn-cyan" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieQuestion()">SEND</button>
                 </div>
 
-                <!-- Guide Direction Form -->
                 <div id="guide-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-a-1">
                         <option value="Go straight">Go straight</option>
@@ -195,7 +196,6 @@
                     <button class="btn-yellow" id="guide-send-btn" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieAnswer()">SEND</button>
                 </div>
 
-                <!-- Guide Arrival Signal Form -->
                 <div id="guide-arrival-form" style="display: none; margin-top: 5px;" class="walkie-inputs">
                     <select id="chat-arrival">
                         <option value="It's on your left.">It's on your left.</option>
@@ -216,7 +216,6 @@
                 </div>
             </div>
 
-            <!-- Explorer Controls -->
             <div id="explorer-controls" style="display: none; width: 100%;">
                 <div class="controls">
                     <button id="btn-fwd" style="background: var(--btn-forward)" onclick="moveChar('forward')" disabled>⬆️ Forward</button>
@@ -231,7 +230,6 @@
         </div>
     </div>
 
-    <!-- Tollgate Modal -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2>👮 Police Checkpoint</h2>
@@ -241,7 +239,6 @@
         </div>
     </div>
 
-    <!-- Lounge Screen -->
     <div id="lounge-screen" class="screen">
         <h2 id="lounge-title" style="color: #39ff14; font-size: 3rem;">Round Cleared!</h2>
         <div class="result-box">
@@ -252,28 +249,29 @@
         <button class="btn-cyan" id="lounge-next-btn" style="display: none; margin-top: 20px; font-size: 1.5rem;">START NEXT ROUND</button>
     </div>
 
-    <!-- Ending Screen -->
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">SUCCESS!</h2>
         <div id="ending-results" class="result-box"></div>
         <button class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
-    <!-- How to Play Modal -->
     <div id="howto-modal" class="modal">
         <div class="modal-box">
             <h2 style="color: #00f0ff; margin-top: 0; text-shadow: 2px 2px black;">❓ HOW TO PLAY</h2>
             <div class="howto-section">
                 <h3 style="margin: 0; color: #ff007f;">1. Explorer (탐험가)</h3>
-                <p style="font-size: 1rem; margin: 5px 0;">주어진 'Situation(상황)'을 보고 목적지를 파악하세요! 무전기로 가이드에게 <b>먼저 길을 물어봐야 합니다.</b> <br>이동이 끝나면 <b>[Move Complete]</b>를 눌러 다음 길을 요구하고, 도착 신호를 받으면 <b>[LOCATION CHECK]</b>를 누르세요.</p>
+                <p style="font-size: 0.95rem; margin: 5px 0;">주어진 'Situation(상황)'을 보고 목적지를 파악하세요! 무전기로 가이드에게 <b>먼저 길을 물어봐야 합니다.</b> 이동이 끝나면 <b>[Move Complete]</b>를 눌러 다음 길을 요구하고, 도착 신호를 받으면 <b>[LOCATION CHECK]</b>를 누르세요.</p>
+                <p style="font-size: 0.9rem; margin: 5px 0; color:#555; font-style:italic;">Deduce your destination from the given 'Situation'. You must <b>ask the Guide for directions first</b> via Walkie-Talkie. When your movement ends, click <b>[Move Complete]</b> to ask for more. Once you receive the arrival signal, press <b>[LOCATION CHECK]</b>.</p>
             </div>
             <div class="howto-section">
                 <h3 style="margin: 0; color: #006064;">2. Guide (가이드)</h3>
-                <p style="font-size: 1rem; margin: 5px 0;">지도가 보이지만 <b>정답 목적지를 모릅니다.</b> 탐험가의 질문을 듣고 길을 안내하세요. 목적지에 도착한 것이 보이면 <b>[📢 Signal Arrival]</b> 버튼으로 도착 신호를 줘야 합니다.</p>
+                <p style="font-size: 0.95rem; margin: 5px 0;">지도가 보이지만 <b>정답 목적지를 모릅니다.</b> 탐험가의 질문을 듣고 길을 안내하세요. 목적지에 도착한 것이 보이면 <b>[📢 Signal Arrival]</b> 버튼으로 도착 신호를 줘야 합니다.</p>
+                <p style="font-size: 0.9rem; margin: 5px 0; color:#555; font-style:italic;">You can see the map but <b>do not know the target destination.</b> Give directions based on the Explorer's questions. When you see the Explorer reach the target, click <b>[📢 Signal Arrival]</b> to give them permission to finish.</p>
             </div>
             <div class="howto-section">
-                <h3 style="margin: 0; color: red;">👮 Police Checkpoint</h3>
-                <p style="font-size: 1rem; margin: 5px 0;">맵 중앙 검문소에서는 <b>가이드 화면에만 암호가 뜹니다.</b> 가이드는 암호를 읽어주고, 탐험가는 타자쳐서 통과하세요!</p>
+                <h3 style="margin: 0; color: red;">👮 Police Checkpoint (검문소)</h3>
+                <p style="font-size: 0.95rem; margin: 5px 0;">맵 중앙 검문소에서는 <b>가이드 화면에만 암호가 뜹니다.</b> 가이드는 암호를 읽어주고, 탐험가는 타자쳐서 통과하세요!</p>
+                <p style="font-size: 0.9rem; margin: 5px 0; color:#555; font-style:italic;">At the center checkpoint, the password appears <b>only on the Guide's screen.</b> The Guide must read it aloud, and the Explorer must type it to pass.</p>
             </div>
             <button class="btn-pink" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('howto-modal').style.display='none'">I UNDERSTAND!</button>
         </div>
@@ -298,14 +296,12 @@
         let isHost = false; let myTeam = "none"; let myRole = "";
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
 
-        // ★ [맵 레이아웃 재설계] 모든 목적지로의 진입은 중앙 검문소[2,2]를 무조건 거쳐가게 연결 (십자 도로)
-        // 0:도로, 1:잔디, 2:Hosp, 4:School, 5:Bank, 6:Park, 7:Checkpoint
         const mapData = [
-            [2, 0, 0, 0, 4], // y=0: Hospital[0,0], 도로[1,0]~[3,0], School[4,0]
-            [1, 1, 0, 1, 1], // y=1: 세로 도로 [2,1]
-            [5, 0, 7, 0, 6], // y=2: Bank[0,2], 도로[1,2], Checkpoint[2,2], 도로[3,2], Park[4,2]
-            [1, 1, 0, 1, 1], // y=3: 세로 도로 [2,3]
-            [1, 1, 0, 0, 0]  // y=4: 도로 [2,4]~[4,4], 시작점 [4,4]
+            [2, 0, 0, 0, 4], 
+            [1, 1, 0, 1, 1], 
+            [5, 0, 7, 0, 6], 
+            [1, 1, 0, 1, 1], 
+            [1, 1, 0, 0, 0]  
         ];
         
         const targets = [
@@ -342,6 +338,18 @@
             if(code.length !== 4) return alert("Enter 4 digits!");
             currentRoom = code; joinDbRoom(); switchScreen('room-screen');
             document.getElementById('room-code-display').innerText = currentRoom;
+        }
+
+        // 방 나가기 기능 구현
+        function leaveRoom() {
+            if (!currentRoom) return;
+            db.ref(`rooms/${currentRoom}/players/${myId}`).remove().then(() => {
+                db.ref(`rooms/${currentRoom}`).off(); // 실시간 감지 리스너 해제
+                currentRoom = "";
+                myTeam = "none";
+                myRole = "";
+                switchScreen('lobby-screen');
+            });
         }
 
         function joinDbRoom() {
@@ -601,66 +609,14 @@
             }
         }
 
-        function sendWalkieQuestion() {
-            const q1 = document.getElementById('chat-q-1').value;
-            const q2 = document.getElementById('chat-q-2').value;
-            const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> ${q1} ${q2}</div>`;
-            
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
-                let currentLog = snap.val().chatLog || "";
-                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
-                    chatLog: currentLog + msg,
-                    lastSender: 'explorer'
-                });
-            });
-        }
-
-        function sendMoveComplete() {
-            const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> ✅ Move complete! What's next?</div>`;
-            
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
-                let currentLog = snap.val().chatLog || "";
-                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
-                    chatLog: currentLog + msg,
-                    lastSender: 'explorer'
-                });
-            });
-        }
-
-        function sendWalkieAnswer() {
-            const a1 = document.getElementById('chat-a-1').value;
-            const a2 = document.getElementById('chat-a-2').value;
-            const moves = parseInt(a2); 
-            const msg = `<div style="padding: 2px 0;"><span style="color:#006064;">[Guide] ${myName}:</span> ${a1} ${a2}</div>`;
-            
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
-                let currentLog = snap.val().chatLog || "";
-                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
-                    chatLog: currentLog + msg,
-                    movesLeft: moves,
-                    lastSender: 'guide'
-                });
-            });
-        }
-
-        function sendArrivalSignal() {
-            const msgText = document.getElementById('chat-arrival').value;
-            const msg = `<div style="padding: 2px 0;"><span style="color:#006064;">[Guide] ${myName}:</span> 📢 ${msgText}</div>`;
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
-                let currentLog = snap.val().chatLog || "";
-                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
-                    chatLog: currentLog + msg,
-                    lastSender: 'guide',
-                    arrivalSignaled: true
-                });
-            });
-        }
-
-        // ★ [가장 중요한 변경점] 모든 건물은 자유롭게 밟을 수 있게 허용 (0,2,4,5,6,7)
         function moveChar(action) {
             if (myRole !== 'Explorer') return; 
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snapshot => {
-                let d = snapshot.val();
+            db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
+                let roomData = snapshot.val();
+                if(!roomData || !roomData.teams || !roomData.teams[myTeam]) return;
+
+                let d = roomData.teams[myTeam];
+                let roundNum = roomData.round || 1;
                 let nx = d.charX, ny = d.charY, nd = d.charDir;
                 let mLeft = d.movesLeft || 0;
 
@@ -675,8 +631,8 @@
                 let step = action === 'forward' ? 1 : -1;
                 if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
 
-                // 정답 건물만 허용하는 것이 아니라, 맵 상의 모든 건물을 통행/진입 가능하도록 배열 허용
-                let allowedCells = [0, 2, 4, 5, 6, 7]; // 0:도로, 7:검문소, 2,4,5,6:모든 목적지 건물
+                // 모든 건물 및 특수타일 자유 진입 허용
+                let allowedCells = [0, 2, 4, 5, 6, 7];
 
                 if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && allowedCells.includes(mapData[ny][nx])) {
                     if(mapData[ny][nx] === 7 && !d.tollgateCleared) {
@@ -714,16 +670,6 @@
             } else {
                 alert("Wrong password! Listen to your guide.");
             }
-        }
-
-        function formatTime(seconds) {
-            let m = String(Math.floor(seconds / 60)).padStart(2, '0'); let s = String(seconds % 60).padStart(2, '0');
-            return `${m}:${s}`;
-        }
-
-        function updateTimer() {
-            let elapsed = Math.floor((Date.now() - roundStartTime) / 1000);
-            document.getElementById('timer-display').innerText = formatTime(elapsed);
         }
 
         function checkWin() {
@@ -780,6 +726,16 @@
                 }
             });
             document.getElementById('ending-results').innerHTML = html;
+        }
+
+        function formatTime(seconds) {
+            let m = String(Math.floor(seconds / 60)).padStart(2, '0'); let s = String(seconds % 60).padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function updateTimer() {
+            let elapsed = Math.floor((Date.now() - roundStartTime) / 1000);
+            document.getElementById('timer-display').innerText = formatTime(elapsed);
         }
 
         function switchScreen(screenId) {
