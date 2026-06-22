@@ -90,7 +90,8 @@
         .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center;}
         .modal-box { background: white; color: black; border: 5px solid #ff007f; border-radius: 20px; padding: 20px; width: 85%; max-width: 600px; font-family: 'Fredoka One'; max-height: 80vh; overflow-y: auto;}
         
-        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 5px 0; display: none; text-align: center;}
+        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 10px 0; display: none; text-align: center;}
+        
         .howto-section { text-align: left; margin-bottom: 20px; padding: 10px; border-left: 5px solid #00f0ff; background: #f0f0f0; border-radius: 0 10px 10px 0;}
     </style>
 </head>
@@ -155,6 +156,7 @@
         <h3 id="role-display" style="margin: 0 0 5px 0;"></h3>
         
         <div class="board-section" id="my-board-section">
+            
             <div id="target-banner">Situation: <span id="target-name">Wait...</span></div>
             <div id="tollgate-password-display">Password: <span id="secret-word"></span></div>
 
@@ -260,17 +262,14 @@
             <div class="howto-section">
                 <h3 style="margin: 0; color: #ff007f;">1. Explorer (탐험가)</h3>
                 <p style="font-size: 0.95rem; margin: 5px 0;">주어진 'Situation(상황)'을 보고 목적지를 파악하세요! 무전기로 가이드에게 <b>먼저 길을 물어봐야 합니다.</b> 이동이 끝나면 <b>[Move Complete]</b>를 눌러 다음 길을 요구하고, 도착 신호를 받으면 <b>[LOCATION CHECK]</b>를 누르세요.</p>
-                <p style="font-size: 0.9rem; margin: 5px 0; color:#555; font-style:italic;">Deduce your destination from the given 'Situation'. You must <b>ask the Guide for directions first</b> via Walkie-Talkie. When your movement ends, click <b>[Move Complete]</b> to ask for more. Once you receive the arrival signal, press <b>[LOCATION CHECK]</b>.</p>
             </div>
             <div class="howto-section">
                 <h3 style="margin: 0; color: #006064;">2. Guide (가이드)</h3>
                 <p style="font-size: 0.95rem; margin: 5px 0;">지도가 보이지만 <b>정답 목적지를 모릅니다.</b> 탐험가의 질문을 듣고 길을 안내하세요. 목적지에 도착한 것이 보이면 <b>[📢 Signal Arrival]</b> 버튼으로 도착 신호를 줘야 합니다.</p>
-                <p style="font-size: 0.9rem; margin: 5px 0; color:#555; font-style:italic;">You can see the map but <b>do not know the target destination.</b> Give directions based on the Explorer's questions. When you see the Explorer reach the target, click <b>[📢 Signal Arrival]</b> to give them permission to finish.</p>
             </div>
             <div class="howto-section">
-                <h3 style="margin: 0; color: red;">👮 Police Checkpoint (검문소)</h3>
+                <h3 style="margin: 0; color: red;">👮 Police Checkpoint</h3>
                 <p style="font-size: 0.95rem; margin: 5px 0;">맵 중앙 검문소에서는 <b>가이드 화면에만 암호가 뜹니다.</b> 가이드는 암호를 읽어주고, 탐험가는 타자쳐서 통과하세요!</p>
-                <p style="font-size: 0.9rem; margin: 5px 0; color:#555; font-style:italic;">At the center checkpoint, the password appears <b>only on the Guide's screen.</b> The Guide must read it aloud, and the Explorer must type it to pass.</p>
             </div>
             <button type="button" class="btn-pink" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('howto-modal').style.display='none'">I UNDERSTAND!</button>
         </div>
@@ -294,6 +293,9 @@
         let myName = ""; let myChar = "char1.png"; let currentRoom = "";
         let isHost = false; let myTeam = "none"; let myRole = "";
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
+        
+        // ★ [안전장치] 로컬 변수 캐싱으로 실시간 버튼 딜레이 원천 차단
+        let localTeamData = null;
 
         const mapData = [
             [2, 0, 0, 0, 4], 
@@ -343,7 +345,7 @@
             if (!currentRoom) return;
             db.ref(`rooms/${currentRoom}/players/${myId}`).remove().then(() => {
                 db.ref(`rooms/${currentRoom}`).off(); 
-                currentRoom = ""; myTeam = "none"; myRole = "";
+                currentRoom = ""; myTeam = "none"; myRole = ""; localTeamData = null;
                 switchScreen('lobby-screen');
             });
         }
@@ -434,7 +436,7 @@
                         rData[`teams/${t}/charX`] = 4; rData[`teams/${t}/charY`] = 4;
                         rData[`teams/${t}/charDir`] = 0; rData[`teams/${t}/path`] = "4,4";
                         rData[`teams/${t}/finished`] = false; rData[`teams/${t}/currentRoundTime`] = 0;
-                        rData[`teams/${t}/chatLog`] = ""; 
+                        rData[`teams/${t}/chatLog`] = " "; // 데이터 삭제 방지용 공백
                         rData[`teams/${t}/lastSender`] = "";
                         rData[`teams/${t}/movesLeft`] = 0; 
                         rData[`teams/${t}/tollgateCleared`] = false;
@@ -517,19 +519,20 @@
             } else { wrapper.style.display = 'none'; }
         }
 
+        // ★ [핵심] DB 업데이트 시 로컬 캐시를 최신화하여 끊김 없는 로직 보장
         function updateGameScreen(data) {
             if(myTeam === 'none' || !data.teams || !data.teams[myTeam]) return;
-            const tData = data.teams[myTeam];
+            localTeamData = data.teams[myTeam]; 
             
             const wrapper = document.getElementById('player-wrapper');
             const sprite = document.getElementById('player-sprite');
-            if(wrapper && tData.charX !== undefined) {
-                wrapper.style.transform = `translate(${tData.charX * 57}px, ${tData.charY * 57}px)`;
-                sprite.style.transform = `rotate(${tData.charDir * 90}deg)`;
+            if(wrapper && localTeamData.charX !== undefined) {
+                wrapper.style.transform = `translate(${localTeamData.charX * 57}px, ${localTeamData.charY * 57}px)`;
+                sprite.style.transform = `rotate(${localTeamData.charDir * 90}deg)`;
             }
 
-            if(tData.path) {
-                const pathArr = tData.path.split('|');
+            if(localTeamData.path) {
+                const pathArr = localTeamData.path.split('|');
                 const points = pathArr.map(p => {
                     const [px, py] = p.split(',');
                     return `${parseInt(px)*57 + 27.5},${parseInt(py)*57 + 27.5}`;
@@ -539,7 +542,7 @@
             }
 
             const chatBox = document.getElementById('chat-display');
-            chatBox.innerHTML = tData.chatLog || "<span style='color:gray; font-weight:normal;'>No messages yet.</span>";
+            chatBox.innerHTML = localTeamData.chatLog || "<span style='color:gray; font-weight:normal;'>No messages yet.</span>";
             chatBox.scrollTop = chatBox.scrollHeight;
 
             const explorerForm = document.getElementById('explorer-chat-form');
@@ -556,7 +559,7 @@
             guideArrivalForm.style.display = 'none';
 
             if(myRole === 'Explorer') {
-                const moves = tData.movesLeft || 0;
+                const moves = localTeamData.movesLeft || 0;
                 document.getElementById('moves-badge').innerText = `Moves: ${moves}`;
                 document.getElementById('moves-badge').style.display = 'inline-block';
                 
@@ -569,13 +572,13 @@
                 if(moves > 0) { btnFwd.disabled = false; btnBwd.disabled = false; } 
                 else { btnFwd.disabled = true; btnBwd.disabled = true; }
 
-                if(tData.arrivalSignaled) {
+                if(localTeamData.arrivalSignaled) {
                     checkBtn.style.display = 'block';
                     promptEl.innerText = "👉 Guide signaled! Check Location!";
-                } else if(!tData.lastSender) {
+                } else if(!localTeamData.lastSender) {
                     explorerForm.style.display = 'flex';
                     promptEl.innerText = "👉 Ask for the destination first!";
-                } else if(tData.lastSender === 'guide') {
+                } else if(localTeamData.lastSender === 'guide') {
                     if(moves > 0) {
                         promptEl.innerText = "👉 Move your character!";
                     } else {
@@ -588,7 +591,7 @@
             }
 
             if(myRole === 'Guide') {
-                if(tData.lastSender === 'explorer') {
+                if(localTeamData.lastSender === 'explorer') {
                     guideForm.style.display = 'flex';
                     guideArrivalForm.style.display = 'flex';
                     promptEl.innerText = "👉 Give directions or signal arrival!";
@@ -597,7 +600,7 @@
                 }
 
                 const pwdDisplay = document.getElementById('tollgate-password-display');
-                if(!tData.tollgateCleared && tData.charX === 2 && tData.charY === 2) {
+                if(!localTeamData.tollgateCleared && localTeamData.charX === 2 && localTeamData.charY === 2) {
                     pwdDisplay.style.display = 'block';
                     document.getElementById('secret-word').innerText = targets[currentRound-1].pwd;
                 } else {
@@ -606,32 +609,25 @@
             }
         }
 
-        // ★ [안전장치 추가] 모든 통신 함수에서 snap.val() || {} 적용
+        // ★ [핵심 픽스] 모든 전송 버튼에서 .once()를 완전히 제거하고 로컬 캐시를 사용해 즉각 반응
         function sendWalkieQuestion() {
             const q1 = document.getElementById('chat-q-1').value;
             const q2 = document.getElementById('chat-q-2').value;
             const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> ${q1} ${q2}</div>`;
             
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
-                let teamData = snap.val() || {};
-                let currentLog = teamData.chatLog || "";
-                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
-                    chatLog: currentLog + msg,
-                    lastSender: 'explorer'
-                }).catch(e => console.error("Walkie Question Error:", e));
+            let currentLog = (localTeamData && localTeamData.chatLog) ? localTeamData.chatLog : " ";
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                chatLog: currentLog + msg,
+                lastSender: 'explorer'
             });
         }
 
         function sendMoveComplete() {
             const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> ✅ Move complete! What's next?</div>`;
-            
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
-                let teamData = snap.val() || {};
-                let currentLog = teamData.chatLog || "";
-                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
-                    chatLog: currentLog + msg,
-                    lastSender: 'explorer'
-                }).catch(e => console.error("Move Complete Error:", e));
+            let currentLog = (localTeamData && localTeamData.chatLog) ? localTeamData.chatLog : " ";
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                chatLog: currentLog + msg,
+                lastSender: 'explorer'
             });
         }
 
@@ -641,79 +637,68 @@
             const moves = parseInt(a2); 
             const msg = `<div style="padding: 2px 0;"><span style="color:#006064;">[Guide] ${myName}:</span> ${a1} ${a2}</div>`;
             
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
-                let teamData = snap.val() || {};
-                let currentLog = teamData.chatLog || "";
-                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
-                    chatLog: currentLog + msg,
-                    movesLeft: moves,
-                    lastSender: 'guide'
-                }).catch(e => console.error("Walkie Answer Error:", e));
+            let currentLog = (localTeamData && localTeamData.chatLog) ? localTeamData.chatLog : " ";
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                chatLog: currentLog + msg,
+                movesLeft: moves,
+                lastSender: 'guide'
             });
         }
 
         function sendArrivalSignal() {
             const msgText = document.getElementById('chat-arrival').value;
             const msg = `<div style="padding: 2px 0;"><span style="color:#006064;">[Guide] ${myName}:</span> 📢 ${msgText}</div>`;
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
-                let teamData = snap.val() || {};
-                let currentLog = teamData.chatLog || "";
-                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
-                    chatLog: currentLog + msg,
-                    lastSender: 'guide',
-                    arrivalSignaled: true
-                }).catch(e => console.error("Arrival Signal Error:", e));
+            let currentLog = (localTeamData && localTeamData.chatLog) ? localTeamData.chatLog : " ";
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                chatLog: currentLog + msg,
+                lastSender: 'guide',
+                arrivalSignaled: true
             });
         }
 
-        // ★ [오류 수정] d.round 대신 글로벌 currentRound 사용, null 체크 강화
+        // 이동 함수도 로컬 캐시를 참조하여 렉 원천 차단
         function moveChar(action) {
             if (myRole !== 'Explorer') return; 
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snapshot => {
-                let d = snapshot.val();
-                if (!d) return;
+            if (!localTeamData) return;
 
-                let nx = d.charX, ny = d.charY, nd = d.charDir;
-                let mLeft = d.movesLeft || 0;
+            let nx = localTeamData.charX, ny = localTeamData.charY, nd = localTeamData.charDir;
+            let mLeft = localTeamData.movesLeft || 0;
 
-                if (action === 'left' || action === 'right') {
-                    nd = action === 'left' ? (nd + 3) % 4 : (nd + 1) % 4;
-                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charDir: nd });
-                    return; 
+            if (action === 'left' || action === 'right') {
+                nd = action === 'left' ? (nd + 3) % 4 : (nd + 1) % 4;
+                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charDir: nd });
+                return; 
+            }
+
+            if (mLeft <= 0) return;
+
+            let step = action === 'forward' ? 1 : -1;
+            if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
+
+            let allowedCells = [0, 2, 4, 5, 6, 7]; // 0:도로, 7:검문소, 그외 건물
+
+            if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && allowedCells.includes(mapData[ny][nx])) {
+                let newPath = localTeamData.path ? (localTeamData.path + `|${nx},${ny}`) : `${nx},${ny}`;
+                
+                if(mapData[ny][nx] === 7 && !localTeamData.tollgateCleared) {
+                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 }).then(() => {
+                        document.getElementById('tollgate-modal').style.display = 'flex';
+                    });
+                    return;
                 }
+                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 });
+            } else {
+                let currentLog = localTeamData.chatLog || " ";
+                let errorMsg = `<div style="padding: 2px 0;"><span style="color:red; font-weight:bold;">⚠️ [System]:</span> Out of road! You can only walk on the road.</div>`;
+                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + errorMsg });
 
-                if (mLeft <= 0) return;
-
-                let step = action === 'forward' ? 1 : -1;
-                if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
-
-                // 글로벌 변수로 안전하게 목적지 추출
-                let targetId = targets[currentRound - 1].id;
-                let allowedCells = [0, 2, 4, 5, 6, 7]; // 모든 목적지 자유 진입
-
-                if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && allowedCells.includes(mapData[ny][nx])) {
-                    if(mapData[ny][nx] === 7 && !d.tollgateCleared) {
-                        let newPath = d.path ? (d.path + `|${nx},${ny}`) : `${nx},${ny}`;
-                        db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 }).then(() => {
-                            document.getElementById('tollgate-modal').style.display = 'flex';
-                        });
-                        return;
-                    }
-                    let newPath = d.path ? (d.path + `|${nx},${ny}`) : `${nx},${ny}`;
-                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 });
-                } else {
-                    let currentLog = d.chatLog || "";
-                    let errorMsg = `<div style="padding: 2px 0;"><span style="color:red; font-weight:bold;">⚠️ [System]:</span> Out of road! You can only walk on the road.</div>`;
-                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + errorMsg });
-
-                    const sprite = document.getElementById('player-sprite');
-                    if(sprite) {
-                        sprite.classList.remove('shake-error');
-                        void sprite.offsetWidth; 
-                        sprite.classList.add('shake-error');
-                    }
+                const sprite = document.getElementById('player-sprite');
+                if(sprite) {
+                    sprite.classList.remove('shake-error');
+                    void sprite.offsetWidth; 
+                    sprite.classList.add('shake-error');
                 }
-            }).catch(e => console.error("Move Error:", e));
+            }
         }
 
         function submitTollgate() {
@@ -731,25 +716,21 @@
 
         function checkWin() {
             if (myRole !== 'Explorer') return;
-            db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
-                let d = snapshot.val();
-                if(!d || !d.teams || !d.teams[myTeam]) return;
-                
-                let tData = d.teams[myTeam];
-                const targetObj = targets[d.round - 1];
+            if (!localTeamData) return;
 
-                if(tData.charX === targetObj.x && tData.charY === targetObj.y) {
-                    if(!tData.arrivalSignaled) {
-                        alert("Wait for the Guide's arrival signal in Walkie-Talkie!");
-                        return;
-                    }
-                    let roundTime = Math.floor((Date.now() - d.startTime) / 1000);
-                    let newTotalTime = (tData.totalTime || 0) + roundTime;
-                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ finished: true, currentRoundTime: roundTime, totalTime: newTotalTime }).then(() => { checkAllTeamsFinished(currentRoom); });
-                } else {
-                    alert("Wrong place! You are not at the destination.");
+            const targetObj = targets[currentRound - 1];
+
+            if(localTeamData.charX === targetObj.x && localTeamData.charY === targetObj.y) {
+                if(!localTeamData.arrivalSignaled) {
+                    alert("Wait for the Guide's arrival signal in Walkie-Talkie!");
+                    return;
                 }
-            });
+                let roundTime = Math.floor((Date.now() - roundStartTime) / 1000);
+                let newTotalTime = (localTeamData.totalTime || 0) + roundTime;
+                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ finished: true, currentRoundTime: roundTime, totalTime: newTotalTime }).then(() => { checkAllTeamsFinished(currentRoom); });
+            } else {
+                alert("Wrong place! You are not at the destination.");
+            }
         }
 
         function checkAllTeamsFinished(roomId) {
