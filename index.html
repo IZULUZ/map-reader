@@ -166,6 +166,7 @@
                 
                 <div class="chat-history" id="chat-display"></div>
                 
+                <!-- Explorer Chat Form -->
                 <div id="explorer-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-q-1">
                         <option value="How can I get to">How can I get to</option>
@@ -180,6 +181,7 @@
                     <button class="btn-cyan" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieQuestion()">SEND</button>
                 </div>
 
+                <!-- Guide Direction Form -->
                 <div id="guide-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-a-1">
                         <option value="Go straight">Go straight</option>
@@ -194,6 +196,7 @@
                     <button class="btn-yellow" id="guide-send-btn" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieAnswer()">SEND</button>
                 </div>
 
+                <!-- Guide Arrival Signal Form -->
                 <div id="guide-arrival-form" style="display: none; margin-top: 5px;" class="walkie-inputs">
                     <select id="chat-arrival">
                         <option value="It's on your left.">It's on your left.</option>
@@ -214,6 +217,7 @@
                 </div>
             </div>
 
+            <!-- Explorer Controls -->
             <div id="explorer-controls" style="display: none; width: 100%;">
                 <div class="controls">
                     <button id="btn-fwd" style="background: var(--btn-forward)" onclick="moveChar('forward')" disabled>⬆️ Forward</button>
@@ -228,6 +232,7 @@
         </div>
     </div>
 
+    <!-- Tollgate Modal -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2>👮 Police Checkpoint</h2>
@@ -237,6 +242,7 @@
         </div>
     </div>
 
+    <!-- Lounge Screen -->
     <div id="lounge-screen" class="screen">
         <h2 id="lounge-title" style="color: #39ff14; font-size: 3rem;">Round Cleared!</h2>
         <div class="result-box">
@@ -247,12 +253,14 @@
         <button class="btn-cyan" id="lounge-next-btn" style="display: none; margin-top: 20px; font-size: 1.5rem;">START NEXT ROUND</button>
     </div>
 
+    <!-- Ending Screen -->
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">SUCCESS!</h2>
         <div id="ending-results" class="result-box"></div>
         <button class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
+    <!-- How to Play Modal -->
     <div id="howto-modal" class="modal">
         <div class="modal-box">
             <h2 style="color: #00f0ff; margin-top: 0; text-shadow: 2px 2px black;">❓ HOW TO PLAY</h2>
@@ -291,19 +299,20 @@
         let isHost = false; let myTeam = "none"; let myRole = "";
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
 
+        // ★ [맵 재설계] 시작점[4,4] 잔디밭 -> 도로[0]로 수정하여 시작 시 길 이탈 오류 원천 방지
         const mapData = [
             [2, 0, 0, 3, 4],
             [1, 3, 0, 1, 0],
             [5, 0, 7, 0, 0], 
             [1, 0, 1, 3, 0],
-            [0, 0, 0, 6, 1]
+            [0, 0, 0, 6, 0] // <- [4,4] 도로
         ];
         
         const targets = [
             { id: 2, name: "HOSPITAL", emoji: "🏥", x: 0, y: 0, pwd: "Where is the hospital", situation: "I have a cold. 🤧 (감기에 걸렸어요.)" },
             { id: 4, name: "SCHOOL", emoji: "🏫", x: 4, y: 0, pwd: "It is on your left", situation: "I have an English class! 🎒 (영어 수업이 있어요!)" },
             { id: 5, name: "BANK", emoji: "🏦", x: 0, y: 2, pwd: "Go straight two blocks", situation: "I need to save money. 💰 (저금을 해야 해요.)" },
-            { id: 6, name: "PARK", emoji: "🌲", x: 4, y: 2, pwd: "Turn right at the corner", situation: "I want to ride a bike. 🚲 (자전거를 타고 싶어요.)" }
+            { id: 6, name: "PARK", emoji: "🌲", x: 3, y: 4, pwd: "Turn right at the corner", situation: "I want to ride a bike. 🚲 (자전거를 타고 싶어요.)" }
         ];
 
         function selectChar(imgName, element) {
@@ -537,7 +546,7 @@
 
             explorerForm.style.display = 'none';
             moveCompleteBtn.style.display = 'none';
-            checkBtn.style.display = 'none'; // 버튼 기본 숨김
+            checkBtn.style.display = 'none';
             guideForm.style.display = 'none';
             guideArrivalForm.style.display = 'none';
 
@@ -555,7 +564,7 @@
                 if(moves > 0) { btnFwd.disabled = false; btnBwd.disabled = false; } 
                 else { btnFwd.disabled = true; btnBwd.disabled = true; }
 
-                // 버튼 가시성 로직 완전 분리
+                // 버튼 가시성 완벽 분리
                 if(tData.arrivalSignaled) {
                     checkBtn.style.display = 'block';
                     promptEl.innerText = "👉 Guide signaled! Check Location!";
@@ -680,10 +689,14 @@
                     let newPath = d.path + `|${nx},${ny}`;
                     db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 });
                 } else {
-                    // 잘못된 길(잔디/장애물 등) 부딪힐 때 빨갛게 떨리는 애니메이션 강제 실행
+                    // ★ 잘못된 길 진입 시 시스템 메시지 발송 및 애니메이션
+                    let currentLog = d.chatLog || "";
+                    let errorMsg = `<div style="padding: 2px 0;"><span style="color:red; font-weight:bold;">⚠️ [System]:</span> Out of road! You can only walk on the road.</div>`;
+                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + errorMsg });
+
                     const sprite = document.getElementById('player-sprite');
                     sprite.classList.remove('shake-error');
-                    void sprite.offsetWidth; // Reflow를 일으켜 애니메이션 재시작 유도
+                    void sprite.offsetWidth; 
                     sprite.classList.add('shake-error');
                 }
             });
