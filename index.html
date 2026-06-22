@@ -46,7 +46,8 @@
         .team-box { width: 230px; min-height: 130px; border: 5px solid white; border-radius: 20px; padding: 10px; background: rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 8px; align-items: center; position: relative; box-shadow: 0 8px 15px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.1s;}
         .team-box:active { transform: scale(0.97); }
         .team-title { font-family: 'Fredoka One'; font-size: 1.4rem; text-align: center; margin-bottom: 5px; text-shadow: 2px 2px black; pointer-events: none;}
-        .player-card { background: white; color: black; border: 3px solid black; border-radius: 12px; padding: 6px 10px; width: 90%; cursor: grab; display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 0.95rem; box-shadow: 2px 2px 0px black; pointer-events: none;}
+        /* 드래그를 위해 pointer-events:none 제거 */
+        .player-card { background: white; color: black; border: 3px solid black; border-radius: 12px; padding: 6px 10px; width: 90%; cursor: grab; display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 0.95rem; box-shadow: 2px 2px 0px black;}
         .player-card img { width: 32px; height: 32px; object-fit: contain; background: #eee; border-radius: 8px; }
 
         .game-header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; background: white; color: black; border: 4px solid black; border-radius: 15px; padding: 10px 20px; margin-bottom: 10px; font-family: 'Fredoka One'; font-size: 1.2rem; box-sizing: border-box; box-shadow: 4px 4px 0 black;}
@@ -185,7 +186,7 @@
         </div>
     </div>
 
-    <!-- 4. Host Dashboard Screen -->
+    <!-- 호스트 관전 대시보드 화면 -->
     <div id="dashboard-screen" class="screen">
         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 15px; border: 2px solid #00f0ff;">
             <h2 style="color: #00f0ff; margin: 0; font-family: 'Fredoka One';">🎮 Live Dashboard</h2>
@@ -198,7 +199,7 @@
         <button type="button" class="btn-pink" id="dash-next-btn" style="margin-top: 30px; display: none; padding: 15px 40px; font-size: 1.5rem; box-shadow: 0 0 20px #ff007f;" onclick="hostNextRound()">START NEXT ROUND 🚀</button>
     </div>
 
-    <!-- 5. Game Screen -->
+    <!-- 플레이어 게임 화면 -->
     <div id="game-screen" class="screen">
         <div class="game-header">
             <span id="round-info">Round 1/4</span>
@@ -281,7 +282,7 @@
         </div>
     </div>
 
-    <!-- Tollgate Modal -->
+    <!-- 검문소(Tollgate) 모달 -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2 style="font-size: 2rem; margin-top: 0;">👮 Police Checkpoint</h2>
@@ -307,7 +308,7 @@
         </div>
     </div>
 
-    <!-- Lounge Screen -->
+    <!-- 라운지 (대기실) -->
     <div id="lounge-screen" class="screen">
         <h2 id="lounge-title" style="color: #39ff14; font-size: 3.5rem; text-shadow: 3px 3px black; text-align: center;">Round Cleared!</h2>
         <div class="result-box" style="background: rgba(0,0,0,0.6);">
@@ -320,7 +321,7 @@
         <button type="button" class="btn-pink" id="lounge-next-btn" style="margin-top: 25px; display: none; padding: 15px 50px; font-size: 1.5rem; box-shadow: 0 0 20px #ff007f;">START NEXT ROUND 🚀</button>
     </div>
 
-    <!-- Ending Screen -->
+    <!-- 엔딩 -->
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4.5rem; margin-bottom: 0; text-shadow: 4px 4px black; text-align: center;">SUCCESS! 🎉</h2>
         <div id="ending-results" class="result-box" style="max-height: 50vh; overflow-y: auto; background: rgba(0,0,0,0.8); border: 5px solid yellow;"></div>
@@ -367,6 +368,12 @@
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1; let gameStartTime = 0;
         let localTeamData = null;
         let isJoining = false;
+        
+        // ★ [핵심 2] 서버 시간 동기화용 변수 설정
+        let serverTimeOffset = 0;
+        db.ref('.info/serverTimeOffset').on('value', snap => {
+            serverTimeOffset = snap.val() || 0;
+        });
         
         let hostTeamCount = 2; 
         const teamNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
@@ -443,7 +450,6 @@
             db.ref(`rooms/${currentRoom}/players/${myId}`).remove().then(() => {
                 db.ref(`rooms/${currentRoom}`).off(); 
                 currentRoom = ""; myTeam = "none"; myRole = ""; localTeamData = null; myTeamColor = "white";
-                // 잔상 초기화
                 document.getElementById('dynamic-team-container').innerHTML = "";
                 document.querySelectorAll('.player-card').forEach(c => c.remove());
                 switchScreen('lobby-screen');
@@ -491,7 +497,6 @@
             });
         }
 
-        // ★ [핵심 1] 터치 입력 지원 (드래그 없이 박스 탭만으로 입장)
         function tapTeamBox(teamName) {
             if(!currentRoom) return;
             myTeam = teamName;
@@ -503,11 +508,9 @@
             db.ref(`rooms/${currentRoom}/players/${myId}`).update({ team: teamName, ready: false });
         }
 
-        // ★ [핵심 2] 스마트 DOM 교체로 클론(복제) 버그 완전 차단
         function renderWaitingRoom(players) {
             const container = document.getElementById('dynamic-team-container');
             
-            // 1. 필요한 팀 박스만 1회 생성 (존재하지 않을 때만)
             if (container.children.length === 0) {
                 for(let i=0; i<hostTeamCount; i++) {
                     let tName = teamNames[i];
@@ -525,7 +528,6 @@
                 }
             }
 
-            // 2. 나간 플레이어 카드 삭제 (가비지 컬렉션)
             const existingCards = document.querySelectorAll('.player-card');
             let currentIds = new Set(Object.keys(players || {}));
             existingCards.forEach(card => {
@@ -539,7 +541,6 @@
 
             let allReady = true;
 
-            // 3. 현재 접속자 상태 갱신 및 위치 이동 (Diffing)
             for(let id in players) {
                 const p = players[id];
                 if(!p.ready && p.team !== 'none') allReady = false; 
@@ -547,18 +548,15 @@
 
                 let card = document.getElementById(id);
                 if (!card) {
-                    // 최초 입장 시 카드 생성
                     card = document.createElement('div');
                     card.className = 'player-card';
-                    card.draggable = (id === myId); // 본인 카드만 드래그 가능
+                    card.draggable = (id === myId);
                     card.id = id;
                     card.ondragstart = drag;
                 }
 
-                // 텍스트/상태만 업데이트
                 card.innerHTML = `<img src="${p.charImg}" alt="char" onerror="this.style.display='none'"><span>${p.name} ${p.ready && p.team !== 'none' ? '✅' : ''}</span>`;
                 
-                // 팀 박스 소속이 달라진 경우에만 위치 이동 (드래그 중단 방지)
                 let targetBox = document.getElementById(p.team === 'none' ? 'team-none' : `team-${p.team}`);
                 if (targetBox && card.parentElement !== targetBox) {
                     targetBox.appendChild(card);
@@ -603,6 +601,7 @@
         function startGame() { startRound(1); }
         function hostNextRound() { startRound(currentRound + 1); }
 
+        // ★ [핵심 2] Date.now() 대신 파이어베이스 서버의 절대 시간을 사용하여 타이머 100% 동기화
         function startRound(roundNum) {
             db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
                 let d = snapshot.val(); let activeTeams = {};
@@ -610,8 +609,8 @@
                     let pTeam = d.players[pid].team;
                     if(pTeam !== 'none') activeTeams[pTeam] = true;
                 }
-                const rData = { status: 'playing', round: roundNum, startTime: Date.now() };
-                if (roundNum === 1) rData.gameStartTime = Date.now();
+                const rData = { status: 'playing', round: roundNum, startTime: firebase.database.ServerValue.TIMESTAMP };
+                if (roundNum === 1) rData.gameStartTime = firebase.database.ServerValue.TIMESTAMP;
 
                 for(let t in activeTeams) {
                     rData[`teams/${t}/charX`] = 4; rData[`teams/${t}/charY`] = 4;
@@ -949,7 +948,6 @@
             }
         }
 
-        // ★ [로직 수정] 방장이 직접 플레이 중일 때 대기실(Lounge)에서도 다음 라운드 진행 버튼을 노출하도록 처리
         function showRoundLounge(data) {
             switchScreen('lounge-screen'); clearInterval(timerInterval);
             document.getElementById('lounge-title').innerText = `Round ${data.round} Cleared!`;
@@ -990,7 +988,10 @@
                 if(!localTeamData.arrivalSignaled) {
                     alert("Wait for the Guide's arrival signal!"); return;
                 }
-                let roundTime = Math.floor((Date.now() - roundStartTime) / 1000);
+                // ★ [핵심 2] 동기화된 절대 시간을 활용하여 타이머 기록 저장
+                let now = Date.now() + serverTimeOffset;
+                let roundTime = Math.floor((now - roundStartTime) / 1000);
+                if(roundTime < 0) roundTime = 0;
                 let newTotalTime = (localTeamData.totalTime || 0) + roundTime;
                 db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ finished: true, currentRoundTime: roundTime, totalTime: newTotalTime }).then(() => { checkAllTeamsFinished(currentRoom); });
             } else {
@@ -1032,14 +1033,18 @@
             return `${m}:${s}`;
         }
 
+        // ★ [핵심 2] 기기 간 동기화된 서버 시간을 바탕으로 0.001초의 오차도 없이 출력
         function updateTimer() {
+            let now = Date.now() + serverTimeOffset;
             if(roundStartTime > 0) {
-                let elapsed = Math.floor((Date.now() - roundStartTime) / 1000);
+                let elapsed = Math.floor((now - roundStartTime) / 1000);
+                if(elapsed < 0) elapsed = 0;
                 const td = document.getElementById('timer-display');
                 if(td) td.innerText = formatTime(elapsed);
             }
             if(gameStartTime > 0 && isHost) {
-                let totalElapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+                let totalElapsed = Math.floor((now - gameStartTime) / 1000);
+                if(totalElapsed < 0) totalElapsed = 0;
                 const dt = document.getElementById('dash-timer');
                 if(dt) dt.innerText = "Total Time: " + formatTime(totalElapsed);
             }
