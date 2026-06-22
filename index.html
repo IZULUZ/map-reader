@@ -44,7 +44,6 @@
         .timer { color: #ff007f; font-size: 1.5rem; }
         
         .board-section { display: flex; flex-direction: column; align-items: center; background: #fff9e6; border: 4px solid black; border-radius: 20px; padding: 15px; width: 100%; max-width: 500px; box-sizing: border-box;}
-        
         #target-banner { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.3rem; color: #ff007f; background: white; padding: 5px 15px; border-radius: 10px; border: 3px solid black; margin-bottom: 10px; text-align: center; width: 100%; box-sizing: border-box; }
         
         .grid-board { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 2px; background: black; border: 4px solid black; position: relative; margin-bottom: 10px;}
@@ -90,7 +89,7 @@
         .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center;}
         .modal-box { background: white; color: black; border: 5px solid #ff007f; border-radius: 20px; padding: 20px; width: 85%; max-width: 600px; font-family: 'Fredoka One'; max-height: 80vh; overflow-y: auto;}
         
-        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 5px 0; display: none; text-align: center;}
+        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 10px 0; display: none; text-align: center;}
         
         .howto-section { text-align: left; margin-bottom: 20px; padding: 10px; border-left: 5px solid #00f0ff; background: #f0f0f0; border-radius: 0 10px 10px 0;}
     </style>
@@ -290,19 +289,20 @@
         let isHost = false; let myTeam = "none"; let myRole = "";
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
 
+        // ★ [맵 레이아웃 재설계] 모든 목적지로의 진입은 중앙 검문소[2,2]를 무조건 거쳐가게 설계
         const mapData = [
-            [2, 0, 0, 3, 4],
-            [1, 3, 0, 1, 0],
-            [5, 0, 7, 0, 0], 
-            [1, 0, 1, 3, 0],
-            [0, 0, 0, 6, 0] 
+            [2, 1, 1, 1, 4], // y=0: Hospital[0,0], School[4,0]
+            [0, 1, 1, 1, 0], // y=1: 외길 세로축 도로망
+            [0, 0, 7, 0, 0], // y=2: Bank[0,2], Checkpoint[2,2], Park[4,2]
+            [1, 1, 0, 1, 1], // y=3: 중앙 통로 유도축
+            [1, 1, 0, 0, 0]  // y=4: 시작점 [4,4] 도로 연결망 완료
         ];
         
         const targets = [
             { id: 2, name: "HOSPITAL", emoji: "🏥", x: 0, y: 0, pwd: "Where is the hospital", situation: "I have a cold. 🤧 (감기에 걸렸어요.)" },
             { id: 4, name: "SCHOOL", emoji: "🏫", x: 4, y: 0, pwd: "It is on your left", situation: "I have an English class! 🎒 (영어 수업이 있어요!)" },
             { id: 5, name: "BANK", emoji: "🏦", x: 0, y: 2, pwd: "Go straight two blocks", situation: "I need to save money. 💰 (저금을 해야 해요.)" },
-            { id: 6, name: "PARK", emoji: "🌲", x: 3, y: 4, pwd: "Turn right at the corner", situation: "I want to ride a bike. 🚲 (자전거를 타고 싶어요.)" }
+            { id: 6, name: "PARK", emoji: "🌲", x: 4, y: 2, pwd: "Turn right at the corner", situation: "I want to ride a bike. 🚲 (자전거를 타고 싶어요.)" }
         ];
 
         function selectChar(imgName, element) {
@@ -646,11 +646,15 @@
             });
         }
 
-        // ★ [버그 완벽 수정 및 개선]
+        // ★ [동적 바인딩 버그 수정] 방 루트 노드를 탐색하여 라운드와 팀 상태를 결합 분석
         function moveChar(action) {
             if (myRole !== 'Explorer') return; 
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snapshot => {
-                let d = snapshot.val();
+            db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
+                let roomData = snapshot.val();
+                if(!roomData || !roomData.teams || !roomData.teams[myTeam]) return;
+
+                let d = roomData.teams[myTeam];
+                let roundNum = roomData.round || 1;
                 let nx = d.charX, ny = d.charY, nd = d.charDir;
                 let mLeft = d.movesLeft || 0;
 
@@ -665,30 +669,31 @@
                 let step = action === 'forward' ? 1 : -1;
                 if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
 
-                // [수정 포인트] 스냅샷 'd'가 아닌 전역 변수 'currentRound'로 라운드 데이터를 안전하게 로드합니다.
-                let targetId = targets[currentRound - 1].id; 
+                let targetId = targets[roundNum - 1].id;
                 let allowedCells = [0, 7, targetId];
 
                 if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && allowedCells.includes(mapData[ny][nx])) {
                     if(mapData[ny][nx] === 7 && !d.tollgateCleared) {
-                        let newPath = d.path + `|${nx},${ny}`;
+                        let newPath = d.path ? (d.path + `|${nx},${ny}`) : `${nx},${ny}`;
                         db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 }).then(() => {
                             document.getElementById('tollgate-modal').style.display = 'flex';
                         });
                         return;
                     }
-                    let newPath = d.path + `|${nx},${ny}`;
+                    let newPath = d.path ? (d.path + `|${nx},${ny}`) : `${nx},${ny}`;
                     db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 });
                 } else {
-                    // 이제 비정상 이동 차단 시 정상적으로 에러 로그가 발송됩니다.
+                    // 도로를 이탈할 때 실시간으로 소통 로그에 기록 연동 처리
                     let currentLog = d.chatLog || "";
                     let errorMsg = `<div style="padding: 2px 0;"><span style="color:red; font-weight:bold;">⚠️ [System]:</span> Out of road! You can only walk on the road.</div>`;
                     db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + errorMsg });
 
                     const sprite = document.getElementById('player-sprite');
-                    sprite.classList.remove('shake-error');
-                    void sprite.offsetWidth; 
-                    sprite.classList.add('shake-error');
+                    if(sprite) {
+                        sprite.classList.remove('shake-error');
+                        void sprite.offsetWidth; 
+                        sprite.classList.add('shake-error');
+                    }
                 }
             });
         }
