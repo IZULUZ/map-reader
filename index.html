@@ -98,7 +98,7 @@
         
         #tollgate-password-display { font-size: 1.3rem; color: #ff007f; background: yellow; padding: 12px; border: 4px dashed black; border-radius: 15px; margin: 5px 0 15px 0; display: none; text-align: center; box-shadow: 3px 3px 0 black;}
         
-        /* 호스트 관전 대시보드 전용 스타일 (세련되게) */
+        /* 호스트 관전 대시보드 전용 스타일 */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; margin-top: 15px;}
         .dash-card { background: white; color: black; border: 5px solid; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 5px 5px 0 rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between;}
         .dash-title { font-family: 'Fredoka One'; font-size: 1.8rem; margin-bottom: 5px; text-shadow: 1px 1px #eee;}
@@ -111,7 +111,6 @@
 
     <h1>🗺️ Map Reader</h1>
 
-    <!-- 1. Intro Screen -->
     <div id="intro-screen" class="screen active">
         <div class="glass-panel">
             <h2 style="color:var(--btn-forward); margin-top: 0;">Enter Your Nickname</h2>
@@ -133,7 +132,6 @@
         </div>
     </div>
 
-    <!-- 2. Lobby Screen -->
     <div id="lobby-screen" class="screen">
         <div class="glass-panel" style="width: 100%; max-width: 600px;">
             <h2 style="margin-top: 0;">Welcome, <span id="display-name" style="color: yellow; text-decoration: underline;"></span>!</h2>
@@ -162,7 +160,6 @@
         </div>
     </div>
 
-    <!-- 3. Waiting Room Screen -->
     <div id="room-screen" class="screen">
         <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <button type="button" class="btn-red" style="padding: 10px 15px; font-size: 1rem;" onclick="leaveRoom()">◀ Leave</button>
@@ -174,9 +171,7 @@
             <p style="margin: 0; font-size:0.95rem; color:#ffeb3b;">Host can stay in 'Waiting Area' to be a Dashboard Spectator!</p>
         </div>
         
-        <div class="team-container" id="dynamic-team-container">
-            <!-- Dynamic Teams -->
-        </div>
+        <div class="team-container" id="dynamic-team-container"></div>
         
         <div style="width: 100%; display:flex; justify-content: center; margin-top: 15px;">
             <div class="team-box" id="team-none" style="width: 100%; max-width: 500px; border-color: gray; background: rgba(255,255,255,0.1);" ondragover="allowDrop(event)" ondrop="drop(event, 'none')">
@@ -190,22 +185,20 @@
         </div>
     </div>
 
-    <!-- 4. Host Dashboard Screen -->
+    <!-- 호스트 관전 대시보드 화면 -->
     <div id="dashboard-screen" class="screen">
         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 15px; border: 2px solid #00f0ff;">
             <h2 style="color: #00f0ff; margin: 0; font-family: 'Fredoka One';">🎮 Live Dashboard</h2>
-            <span class="timer" id="dash-timer" style="margin: 0;">00:00</span>
+            <span class="timer" id="dash-timer" style="margin: 0;">Total Time: 00:00</span>
         </div>
         <h3 id="dash-round-info" style="color: yellow; margin: 10px 0; font-size: 1.5rem;">Round 1</h3>
         
-        <div class="dashboard-grid" id="dash-grid">
-            <!-- Dynamic Dashboard Cards -->
-        </div>
+        <div class="dashboard-grid" id="dash-grid"></div>
         
         <button type="button" class="btn-pink" id="dash-next-btn" style="margin-top: 30px; display: none; padding: 15px 40px; font-size: 1.5rem; box-shadow: 0 0 20px #ff007f;" onclick="hostNextRound()">START NEXT ROUND 🚀</button>
     </div>
 
-    <!-- 5. Game Screen -->
+    <!-- 플레이어 게임 화면 -->
     <div id="game-screen" class="screen">
         <div class="game-header">
             <span id="round-info">Round 1/4</span>
@@ -242,7 +235,7 @@
 
                 <div id="guide-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-a-1">
-                        <option value="Go straight for">Go straight for</option>
+                        <option value="Go straight">Go straight</option>
                         <option value="Turn left and go">Turn left and go</option>
                         <option value="Turn right and go">Turn right and go</option>
                     </select>
@@ -258,9 +251,9 @@
                     <select id="chat-arrival">
                         <option value="It's on your left.">It's on your left.</option>
                         <option value="It's on your right.">It's on your right.</option>
-                        <option value="You arrived at the destination!">You arrived at the destination!</option>
+                        <option value="You arrived!">You arrived!</option>
                     </select>
-                    <button type="button" class="btn-pink" style="padding: 8px 15px; font-size:1rem; width:100%;" onclick="sendArrivalSignal()">📢 Signal Arrival (도착 승인)</button>
+                    <button type="button" class="btn-pink" style="padding: 8px 15px; font-size:1rem; width:100%;" onclick="sendArrivalSignal()">📢 Signal Arrival</button>
                 </div>
             </div>
             
@@ -282,13 +275,13 @@
                     <button type="button" id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')">↪️ Turn Right</button>
                 </div>
                 
-                <button type="button" class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 15px; display: none; padding: 15px;" onclick="sendMoveComplete()">✅ Move Complete (Ask for next direction)</button>
-                <button type="button" class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 15px; display: none; padding: 15px; font-size: 1.3rem;">🚩 LOCATION CHECK (Finish Round)</button>
+                <button type="button" class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 15px; display: none; padding: 15px;" onclick="sendMoveComplete()">✅ Move Complete</button>
+                <button type="button" class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 15px; display: none; padding: 15px; font-size: 1.3rem;">🚩 Location Check</button>
             </div>
         </div>
     </div>
 
-    <!-- Tollgate Modal -->
+    <!-- 검문소(Tollgate) 모달 (영어 전용, 난이도 하향) -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2 style="font-size: 2rem; margin-top: 0;">👮 Police Checkpoint</h2>
@@ -296,7 +289,7 @@
             
             <div id="tollgate-type-blank" style="display:none; margin: 20px 0;">
                 <p id="tollgate-hint-text" style="font-size: 1.6rem; letter-spacing: 5px; color: #ff007f; background: #eee; padding: 15px; border-radius: 15px; border: 3px dashed #ff007f; font-weight: 900;"></p>
-                <input type="text" id="tollgate-input" placeholder="Type full sentence here" style="width: 100%; box-sizing: border-box; font-size: 1.3rem;" autocomplete="off">
+                <input type="text" id="tollgate-input" placeholder="Type the words here" style="width: 100%; box-sizing: border-box; font-size: 1.3rem;" autocomplete="off">
             </div>
 
             <div id="tollgate-type-combo" style="display:none; margin: 20px 0;">
@@ -314,7 +307,6 @@
         </div>
     </div>
 
-    <!-- Lounge Screen -->
     <div id="lounge-screen" class="screen">
         <h2 id="lounge-title" style="color: #39ff14; font-size: 3.5rem; text-shadow: 3px 3px black; text-align: center;">Round Cleared!</h2>
         <div class="result-box" style="background: rgba(0,0,0,0.6);">
@@ -326,30 +318,26 @@
         </div>
     </div>
 
-    <!-- Ending Screen -->
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4.5rem; margin-bottom: 0; text-shadow: 4px 4px black; text-align: center;">SUCCESS! 🎉</h2>
         <div id="ending-results" class="result-box" style="max-height: 50vh; overflow-y: auto; background: rgba(0,0,0,0.8); border: 5px solid yellow;"></div>
         <button type="button" class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
-    <!-- How to Play Modal -->
     <div id="howto-modal" class="modal">
         <div class="modal-box">
             <h2 style="color: #00f0ff; margin-top: 0; text-shadow: 2px 2px black; font-size: 2rem;">❓ HOW TO PLAY</h2>
             <div class="howto-section">
-                <h3 style="margin: 0; color: #ff007f; font-size: 1.2rem;">1. Explorer (탐험가)</h3>
-                <p style="font-size: 1rem; margin: 8px 0; line-height: 1.4;">주어진 'Situation(상황)'을 보고 목적지를 파악하세요! 무전기로 가이드에게 <b>먼저 길을 물어봐야 합니다.</b> 이동이 끝나면 <b>[Move Complete]</b>를 눌러 다음 길을 요구하고, 도착 신호를 받으면 <b>[LOCATION CHECK]</b>를 누르세요.</p>
-                <p style="font-size: 0.9rem; margin: 5px 0; color:#666; font-style:italic;">Deduce your destination from the given 'Situation'. You must <b>ask the Guide for directions first</b> via Walkie-Talkie. When your movement ends, click <b>[Move Complete]</b> to ask for more. Once you receive the arrival signal, press <b>[LOCATION CHECK]</b>.</p>
+                <h3 style="margin: 0; color: #ff007f; font-size: 1.2rem;">1. Explorer</h3>
+                <p style="font-size: 1rem; margin: 8px 0; line-height: 1.4;">Deduce your destination from the 'Situation'. You must <b>ask the Guide for directions first</b> via Walkie-Talkie. When your movement ends, click <b>[Move Complete]</b> to ask for more. Once you receive the arrival signal, press <b>[Location Check]</b>.</p>
             </div>
             <div class="howto-section">
-                <h3 style="margin: 0; color: #006064; font-size: 1.2rem;">2. Guide (가이드)</h3>
-                <p style="font-size: 1rem; margin: 8px 0; line-height: 1.4;">지도가 보이지만 <b>정답 목적지를 모릅니다.</b> 탐험가의 질문을 듣고 길을 안내하세요. 목적지에 도착한 것이 보이면 <b>[📢 Signal Arrival]</b> 버튼으로 도착 신호를 줘야 합니다.</p>
-                <p style="font-size: 0.9rem; margin: 5px 0; color:#666; font-style:italic;">You can see the map but <b>do not know the target destination.</b> Give directions based on the Explorer's questions. When you see the Explorer reach the target, click <b>[📢 Signal Arrival]</b> to give them permission to finish.</p>
+                <h3 style="margin: 0; color: #006064; font-size: 1.2rem;">2. Guide</h3>
+                <p style="font-size: 1rem; margin: 8px 0; line-height: 1.4;">You can see the map but <b>do not know the destination.</b> Give directions based on the Explorer's questions. When you see the Explorer reach the target, click <b>[📢 Signal Arrival]</b>.</p>
             </div>
             <div class="howto-section">
                 <h3 style="margin: 0; color: red; font-size: 1.2rem;">👮 Checkpoint Missions</h3>
-                <p style="font-size: 1rem; margin: 8px 0; line-height: 1.4;">맵 중앙 검문소에서는 <b>가이드 화면에만 암호가 뜹니다.</b> <br>홀수 라운드는 <b>빈칸 추론(타이핑)</b>, 짝수 라운드는 <b>방향키 콤보 입력</b>입니다. 무전기로 암호를 소통하세요!</p>
+                <p style="font-size: 1rem; margin: 8px 0; line-height: 1.4;">At the center checkpoint, the password appears <b>only on the Guide's screen.</b> Odd rounds: <b>Fill-in-the-blank typing</b>. Even rounds: <b>Directional Combo (Buttons)</b>. Communicate via Walkie-Talkie!</p>
             </div>
             <button type="button" class="btn-pink" style="width: 100%; margin-top: 10px; padding: 15px; font-size: 1.2rem;" onclick="document.getElementById('howto-modal').style.display='none'">I UNDERSTAND!</button>
         </div>
@@ -372,7 +360,7 @@
         let myId = "user_" + Math.floor(Math.random() * 10000);
         let myName = ""; let myChar = "char1.png"; let currentRoom = "";
         let isHost = false; let myTeam = "none"; let myRole = ""; let myTeamColor = "white";
-        let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
+        let timerInterval = null; let roundStartTime = 0; let currentRound = 1; let gameStartTime = 0;
         let localTeamData = null;
         
         let hostTeamCount = 2; 
@@ -380,7 +368,6 @@
         const teamColors = ['#ff007f', '#00f0ff', '#39ff14', '#ffeb3b', '#ff8c00', '#9d00ff', '#ff1493', '#00ff7f', '#ffff00', '#00fa9a', '#ff4500', '#1e90ff'];
         let myComboInput = [];
 
-        // 다이내믹 맵 글로벌 변수
         let globalTargets = [];
         let globalMapData = [];
         const baseMapData = [
@@ -391,12 +378,12 @@
             [1, 1, 0, 0, 0]  
         ];
 
-        // 기본 건물 스펙
+        // 초등 5학년 난이도에 맞춰 검문소 구문 대폭 간소화, 한글 제거
         const buildingSpecs = [
-            { id: 2, name: "HOSPITAL", emoji: "🏥", pwdType: "blank", pwdGuide: "Go straight for two blocks.", pwdExplorer: "G_ str__ght f_r tw_ bl_ck_s.", pwdAns: "go straight for two blocks.", situation: "I have a cold. 🤧 (감기에 걸렸어요.)" },
-            { id: 4, name: "SCHOOL", emoji: "🏫", pwdType: "combo", pwdGuide: "Forward, Left, Forward", pwdAns: "forward,left,forward", situation: "I have an English class! 🎒 (영어 수업이 있어요!)" },
-            { id: 5, name: "BANK", emoji: "🏦", pwdType: "blank", pwdGuide: "Turn left and go one block.", pwdExplorer: "T_rn l_ft _nd g_ _ne bl_ck.", pwdAns: "turn left and go one block.", situation: "I need to save money. 💰 (저금을 해야 해요.)" },
-            { id: 6, name: "PARK", emoji: "🌲", pwdType: "combo", pwdGuide: "Right, Forward, Forward", pwdAns: "right,forward,forward", situation: "I want to ride a bike. 🚲 (자전거를 타고 싶어요.)" }
+            { id: 2, name: "HOSPITAL", emoji: "🏥", pwdType: "blank", pwdGuide: "Go straight.", pwdExplorer: "G_ st_ai_ht.", pwdAns: "gostraight", situation: "I have a cold. 🤧" },
+            { id: 4, name: "SCHOOL", emoji: "🏫", pwdType: "combo", pwdGuide: "Go straight, Turn left, Go straight", pwdAns: "forward,left,forward", situation: "I have an English class! 🎒" },
+            { id: 5, name: "BANK", emoji: "🏦", pwdType: "blank", pwdGuide: "Turn left.", pwdExplorer: "T_rn l_ft.", pwdAns: "turnleft", situation: "I need to save money. 💰" },
+            { id: 6, name: "PARK", emoji: "🌲", pwdType: "combo", pwdGuide: "Turn right, Go straight, Go straight", pwdAns: "right,forward,forward", situation: "I want to ride a bike. 🚲" }
         ];
 
         function selectChar(imgName, element) {
@@ -412,16 +399,14 @@
             switchScreen('lobby-screen');
         }
 
-        // ★ [핵심] 방 생성 시 타겟(건물) 위치 4곳 모서리에 랜덤 셔플 할당
         function createRoom() {
             const countSelect = document.getElementById('team-count-select');
             hostTeamCount = parseInt(countSelect.value);
             currentRoom = Math.floor(1000 + Math.random() * 9000).toString(); isHost = true;
             
-            // 랜덤 좌표 셔플
             let coords = [ {x:0, y:0}, {x:4, y:0}, {x:0, y:2}, {x:4, y:2} ];
             coords.sort(() => Math.random() - 0.5);
-            let randomTargets = JSON.parse(JSON.stringify(buildingSpecs)); // Deep copy
+            let randomTargets = JSON.parse(JSON.stringify(buildingSpecs)); 
             for(let i=0; i<4; i++){
                 randomTargets[i].x = coords[i].x;
                 randomTargets[i].y = coords[i].y;
@@ -456,7 +441,6 @@
         }
 
         function joinDbRoom() {
-            // ★ [버그 픽스] 중복 입장(리스너 다중 부착) 방지를 위해 기존 리스너 해제 후 재부착
             db.ref(`rooms/${currentRoom}`).off();
             const playerRef = db.ref(`rooms/${currentRoom}/players/${myId}`);
             playerRef.set({ name: myName, charImg: myChar, team: 'none', ready: false });
@@ -464,13 +448,14 @@
             db.ref(`rooms/${currentRoom}`).on('value', (snapshot) => {
                 const data = snapshot.val(); if(!data) return;
 
-                // 맵 동적 로딩
                 if(data.targetConfig) {
                     globalTargets = data.targetConfig;
                     let tempMap = JSON.parse(JSON.stringify(baseMapData));
                     globalTargets.forEach(t => { tempMap[t.y][t.x] = t.id; });
                     globalMapData = tempMap;
                 }
+                
+                if (data.gameStartTime) gameStartTime = data.gameStartTime;
 
                 if(data.status === 'waiting') {
                     renderWaitingRoom(data.players);
@@ -507,8 +492,6 @@
                 let color = teamColors[i % teamColors.length];
                 container.innerHTML += `<div class="team-box" id="team-${tName}" ondragover="allowDrop(event)" ondrop="drop(event, '${tName}')" style="border-color: ${color};"><div class="team-title" style="color: ${color};">TEAM ${tName}</div></div>`;
             }
-
-            document.getElementById('team-none').innerHTML = `<div class="team-title" style="color: white;">👀 Waiting Area (Spectators)</div>`;
 
             let total = 0; let allReady = true;
             for(let id in players) {
@@ -572,6 +555,8 @@
                     if(pTeam !== 'none') activeTeams[pTeam] = true;
                 }
                 const rData = { status: 'playing', round: roundNum, startTime: Date.now() };
+                if (roundNum === 1) rData.gameStartTime = Date.now();
+
                 for(let t in activeTeams) {
                     rData[`teams/${t}/charX`] = 4; rData[`teams/${t}/charY`] = 4;
                     rData[`teams/${t}/charDir`] = 0; rData[`teams/${t}/path`] = "4,4";
@@ -593,7 +578,8 @@
 
         function updateDashboard(data) {
             document.getElementById('dash-round-info').innerText = `Round ${data.round} / 4  (${data.status.toUpperCase()})`;
-            document.getElementById('dash-timer').innerText = formatTime(Math.floor((Date.now() - data.startTime) / 1000));
+            roundStartTime = data.startTime;
+            if(!timerInterval) timerInterval = setInterval(updateTimer, 1000);
             
             const grid = document.getElementById('dash-grid');
             grid.innerHTML = "";
@@ -609,13 +595,12 @@
                         <div class="dash-card" style="border-color: ${tColor};">
                             <div class="dash-title" style="color: ${tColor};">TEAM ${t}</div>
                             <div class="dash-info" style="color: ${statusColor}; background: black; padding: 5px; border-radius: 10px;">${timeText}</div>
-                            <div style="font-size:1rem; font-weight:bold; margin-bottom: 5px;">Total: ${formatTime(d.totalTime || 0)}</div>
+                            <div style="font-size:1rem; font-weight:bold; margin-bottom: 5px;">Score Time: ${formatTime(d.totalTime || 0)}</div>
                             <div class="dash-log">${d.chatLog ? d.chatLog : ''}</div>
                         </div>
                     `;
                 }
             }
-            // Auto scroll all dash logs
             document.querySelectorAll('.dash-log').forEach(el => el.scrollTop = el.scrollHeight);
 
             if(data.status === 'round_end' && data.round < 4) {
@@ -817,6 +802,7 @@
             const a1 = document.getElementById('chat-a-1').value;
             const a2 = document.getElementById('chat-a-2').value;
             const moves = parseInt(a2); 
+            // 완벽한 문장 조합 "Go straight" + "2 blocks." -> "Go straight 2 blocks."
             const msg = `<div style="padding: 2px 0; border-bottom: 1px solid #ddd;"><span style="color:#006064;">[Guide] ${myName}:</span> ${a1} ${a2}</div>`;
             let currentLog = (localTeamData && localTeamData.chatLog) ? localTeamData.chatLog : " ";
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + msg, movesLeft: moves, lastSender: 'guide' });
@@ -888,7 +874,8 @@
             if(targetObj.pwdType === 'blank') {
                 const inputVal = document.getElementById('tollgate-input').value.trim().toLowerCase();
                 const correctPwd = targetObj.pwdAns.toLowerCase();
-                if(inputVal.replace(/[?.!]/g, '') === correctPwd.replace(/[?.!]/g, '')) isCorrect = true;
+                // 띄어쓰기, 구두점 제거 후 깔끔하게 비교
+                if(inputVal.replace(/[\s?.!]/g, '') === correctPwd.replace(/[\s?.!]/g, '')) isCorrect = true;
             } else {
                 if(myComboInput.join(',') === targetObj.pwdAns) isCorrect = true;
             }
@@ -948,7 +935,6 @@
             if(myTeam !== 'none' && data.teams && data.teams[myTeam]) {
                 let myTime = data.teams[myTeam].currentRoundTime; document.getElementById('lounge-my-time').innerText = formatTime(myTime);
             }
-            // 방장(호스트)만이 관전 모드에서 [START NEXT ROUND]를 누름
             if(data.status === 'round_end') {
                 document.getElementById('lounge-status').innerText = "Wait for the Host to start next round!";
             } else {
@@ -974,8 +960,17 @@
         }
 
         function updateTimer() {
-            let elapsed = Math.floor((Date.now() - roundStartTime) / 1000);
-            document.getElementById('timer-display').innerText = formatTime(elapsed);
+            if(roundStartTime > 0) {
+                let elapsed = Math.floor((Date.now() - roundStartTime) / 1000);
+                const td = document.getElementById('timer-display');
+                if(td) td.innerText = formatTime(elapsed);
+            }
+            // 대시보드 총 누적 시간 실시간 렌더링
+            if(gameStartTime > 0 && isHost && myTeam === 'none') {
+                let totalElapsed = Math.floor((Date.now() - gameStartTime) / 1000);
+                const dt = document.getElementById('dash-timer');
+                if(dt) dt.innerText = "Total Time: " + formatTime(totalElapsed);
+            }
         }
 
         function switchScreen(screenId) {
