@@ -29,11 +29,14 @@
 
         input, select { font-family: 'Nunito', sans-serif; font-size: 1.2rem; padding: 10px; border: 4px solid black; border-radius: 10px; text-align: center; margin-bottom: 10px; }
         
+        /* 캐릭터 선택 UI */
         .char-selection-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;}
         .char-option { width: 70px; height: 70px; border: 4px solid white; border-radius: 15px; background-color: rgba(255,255,255,0.2); cursor: pointer; overflow: hidden; display: flex; justify-content: center; align-items: center; position: relative; }
         .char-option.selected { border-color: #39ff14; background-color: rgba(57,255,20,0.3); box-shadow: 0 0 15px #39ff14; }
         .char-option img { width: 100%; height: 100%; object-fit: contain; }
+        .char-option::before { content: '👤'; font-size: 2rem; position: absolute; z-index: -1; }
         
+        /* 대기방 및 카드 */
         .team-container { display: flex; gap: 20px; width: 100%; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
         .team-box { width: 280px; min-height: 150px; border: 4px dashed white; border-radius: 20px; padding: 10px; background: rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 10px; align-items: center; }
         .team-title { font-family: 'Fredoka One'; font-size: 1.5rem; text-align: center; margin-bottom: 5px; }
@@ -41,22 +44,24 @@
         .player-card img { width: 35px; height: 35px; object-fit: contain; background: #eee; border-radius: 5px; }
 
         .game-header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; background: white; color: black; border: 4px solid black; border-radius: 10px; padding: 10px 20px; margin-bottom: 5px; font-family: 'Fredoka One'; font-size: 1.2rem; box-sizing: border-box;}
+        .timer { color: #ff007f; font-size: 1.5rem; }
         
         .board-section { display: flex; flex-direction: column; align-items: center; background: #fff9e6; border: 4px solid black; border-radius: 20px; padding: 15px; width: 100%; max-width: 500px; box-sizing: border-box;}
         .grid-board { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 2px; background: black; border: 4px solid black; position: relative; margin-bottom: 10px;}
         .cell { width: 55px; height: 55px; background-color: var(--grid-grass); display: flex; justify-content: center; align-items: center; font-size: 1.8rem; position: relative; }
         
-        .road { background-color: var(--grid-road); background-image: url('./road.png'); background-size: cover; }
-        .obstacle-cell { background-image: url('./obstacle.png'); background-size: cover; }
+        /* 타일 이미지 (상대경로 오류 방지를 위해 파일명만 사용) */
+        .road { background-color: var(--grid-road); background-image: url('road.png'); background-size: cover; }
+        .obstacle-cell { background-image: url('obstacle.png'); background-size: cover; }
         .building-cell { position: relative; background-size: cover; }
-        .tollgate-cell { background-color: #ffcccc; border: 2px dashed red; } /* 경찰 검문소 칸 */
+        .tollgate-cell { background-color: #ffcccc; border: 2px dashed red; } 
         
         .char-wrapper { position: absolute; width: 55px; height: 55px; z-index: 10; transition: transform 0.3s ease-in-out; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; }
         .char-sprite { width: 40px; height: 40px; object-fit: contain; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
         .char-name-tag { position: absolute; bottom: -8px; background: rgba(0,0,0,0.8); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; white-space: nowrap; }
         .path-dot { width: 10px; height: 10px; background-color: yellow; border: 2px solid black; border-radius: 50%; position: absolute; z-index: 5; }
 
-        /* 무전기(채팅) 및 컨트롤 UI */
+        /* 무전기(채팅) 시스템 */
         .walkie-talkie { background: #e0f7fa; border: 4px solid #006064; border-radius: 10px; padding: 10px; width: 100%; box-sizing: border-box; color: black; margin-bottom: 10px;}
         .walkie-title { font-family: 'Fredoka One'; color: #006064; margin: 0 0 5px 0; font-size: 1rem; display: flex; justify-content: space-between;}
         .message-box { background: white; border: 2px solid #006064; padding: 5px; border-radius: 5px; font-weight: bold; min-height: 25px; margin-bottom: 5px; font-size: 0.9rem;}
@@ -79,20 +84,24 @@
 
     <h1>Map Reader</h1>
 
+    <!-- 1. 인트로 화면 -->
     <div id="intro-screen" class="screen active">
         <h2 style="color:var(--btn-forward)">Enter Your Nickname</h2>
         <input type="text" id="nickname-input" placeholder="Your Name" maxlength="10">
+        
         <h3 style="color:var(--btn-right)">Select Your Character</h3>
         <div class="char-selection-container">
-            <div class="char-option selected" onclick="selectChar('./char1.png', this)"><img src="./char1.png" alt="char1"></div>
-            <div class="char-option" onclick="selectChar('./char2.png', this)"><img src="./char2.png" alt="char2"></div>
-            <div class="char-option" onclick="selectChar('./char3.png', this)"><img src="./char3.png" alt="char3"></div>
-            <div class="char-option" onclick="selectChar('./char4.png', this)"><img src="./char4.png" alt="char4"></div>
-            <div class="char-option" onclick="selectChar('./char5.png', this)"><img src="./char5.png" alt="char5"></div>
+            <div class="char-option selected" onclick="selectChar('char1.png', this)"><img src="char1.png" alt="char1" onerror="this.style.display='none'"></div>
+            <div class="char-option" onclick="selectChar('char2.png', this)"><img src="char2.png" alt="char2" onerror="this.style.display='none'"></div>
+            <div class="char-option" onclick="selectChar('char3.png', this)"><img src="char3.png" alt="char3" onerror="this.style.display='none'"></div>
+            <div class="char-option" onclick="selectChar('char4.png', this)"><img src="char4.png" alt="char4" onerror="this.style.display='none'"></div>
+            <div class="char-option" onclick="selectChar('char5.png', this)"><img src="char5.png" alt="char5" onerror="this.style.display='none'"></div>
         </div>
+
         <button class="btn-pink" onclick="login()">ENTER GAME</button>
     </div>
 
+    <!-- 2. 로비 화면 -->
     <div id="lobby-screen" class="screen">
         <h2>Welcome, <span id="display-name" style="color: yellow;"></span>!</h2>
         <div style="display: flex; gap: 20px; margin-top: 30px; align-items: center;">
@@ -105,6 +114,7 @@
         </div>
     </div>
 
+    <!-- 3. 대기방 화면 -->
     <div id="room-screen" class="screen">
         <h2>Room Code: <span id="room-code-display" style="color:#39ff14; font-size: 3rem;"></span></h2>
         <p>Drag your character card to pick a team!</p>
@@ -119,6 +129,7 @@
         </div>
     </div>
 
+    <!-- 4. 게임 화면 -->
     <div id="game-screen" class="screen">
         <div class="game-header">
             <span id="round-info">Round 1/4</span>
@@ -128,6 +139,7 @@
         
         <div class="board-section" id="my-board-section">
             
+            <!-- 가이드 전용 UI -->
             <div id="guide-info-panel" style="display: none; width: 100%; text-align: center;">
                 <div style="font-family:'Fredoka One'; font-size:1.2rem; color:#ff007f; background:white; padding:5px; border-radius:5px; border:2px solid black; margin-bottom:5px;">
                     Target: <span id="guide-target-display"></span>
@@ -135,6 +147,7 @@
                 <div id="tollgate-password-display">Password: <span id="secret-word"></span></div>
             </div>
 
+            <!-- 무전기 (채팅) -->
             <div class="walkie-talkie" id="walkie-talkie">
                 <div class="walkie-title">
                     <span>📻 Walkie-Talkie</span>
@@ -173,23 +186,25 @@
             
             <div class="grid-board" id="grid">
                 <div class="char-wrapper" id="player-wrapper" style="display:none;">
-                    <img id="player-sprite" class="char-sprite" src="./char1.png" alt="player">
+                    <img id="player-sprite" class="char-sprite" src="char1.png" alt="player">
                     <div class="char-name-tag" id="player-name-tag">Player</div>
                 </div>
             </div>
 
+            <!-- 탐험가 전용 조종 (제자리 회전은 에너지 소모 안함!) -->
             <div id="explorer-controls" style="display: none; width: 100%;">
                 <div class="controls">
                     <button id="btn-fwd" style="background: var(--btn-forward)" onclick="moveChar('forward')" disabled>⬆️ Forward</button>
                     <button id="btn-bwd" style="background: var(--btn-backward)" onclick="moveChar('backward')" disabled>⬇️ Backward</button>
-                    <button id="btn-left" style="background: var(--btn-left)" onclick="moveChar('left')" disabled>↩️ Turn Left</button>
-                    <button id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')" disabled>↪️ Turn Right</button>
+                    <button id="btn-left" style="background: var(--btn-left)" onclick="moveChar('left')">↩️ Turn Left</button>
+                    <button id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')">↪️ Turn Right</button>
                 </div>
                 <button class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 10px;">✅ CHECK DESTINATION</button>
             </div>
         </div>
     </div>
 
+    <!-- 검문소(Tollgate) 모달 -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2>👮 Police Checkpoint</h2>
@@ -199,6 +214,7 @@
         </div>
     </div>
 
+    <!-- 5. 라운지 화면 -->
     <div id="lounge-screen" class="screen">
         <h2 id="lounge-title" style="color: #39ff14; font-size: 3rem;">Round Cleared!</h2>
         <div class="result-box">
@@ -209,6 +225,7 @@
         <button class="btn-cyan" id="lounge-next-btn" style="display: none; margin-top: 20px; font-size: 1.5rem;">START NEXT ROUND</button>
     </div>
 
+    <!-- 6. 게임 종료 -->
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">GAME OVER!</h2>
         <div id="ending-results" class="result-box"></div>
@@ -230,11 +247,10 @@
         const db = firebase.database();
 
         let myId = "user_" + Math.floor(Math.random() * 10000);
-        let myName = ""; let myChar = "./char1.png"; let currentRoom = "";
+        let myName = ""; let myChar = "char1.png"; let currentRoom = "";
         let isHost = false; let myTeam = "none"; let myRole = "";
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
 
-        // 7은 NPC 검문소 (중앙 교차로 길막)
         const mapData = [
             [2, 0, 0, 3, 4],
             [1, 3, 0, 1, 0],
@@ -250,16 +266,19 @@
             { id: 6, name: "PARK", x: 3, y: 4, pwd: "Turn right at the corner" }
         ];
 
+        // [버그 수정 1] 캐릭터 선택 로직 안정화
         function selectChar(imgName, element) {
             myChar = imgName;
             document.querySelectorAll('.char-option').forEach(el => el.classList.remove('selected'));
             element.classList.add('selected');
         }
 
+        // [버그 수정 2] 로그인 화면 멈춤 현상 제거
         function login() {
             const nameInput = document.getElementById('nickname-input').value.trim();
             if(!nameInput) return alert("Please enter a nickname!");
-            myName = nameInput; document.getElementById('display-name').innerText = myName;
+            myName = nameInput; 
+            document.getElementById('display-name').innerText = myName;
             switchScreen('lobby-screen');
         }
 
@@ -309,7 +328,7 @@
             for(let id in players) {
                 const p = players[id]; const div = document.createElement('div');
                 div.className = 'player-card'; div.draggable = (id === myId); div.id = id; div.ondragstart = drag;
-                div.innerHTML = `<img src="${p.charImg}" alt="char"><span>${p.name} ${p.ready ? '✅' : ''}</span>`;
+                div.innerHTML = `<img src="${p.charImg}" alt="char" onerror="this.style.display='none'"><span>${p.name} ${p.ready ? '✅' : ''}</span>`;
                 document.getElementById('team-' + p.team).appendChild(div);
             }
         }
@@ -341,9 +360,9 @@
                         rData[`teams/${t}/charX`] = 4; rData[`teams/${t}/charY`] = 4;
                         rData[`teams/${t}/charDir`] = 0; rData[`teams/${t}/path`] = "4,4";
                         rData[`teams/${t}/finished`] = false; rData[`teams/${t}/currentRoundTime`] = 0;
-                        rData[`teams/${t}/chat`] = "Waiting for communication..."; // 채팅 초기화
-                        rData[`teams/${t}/movesLeft`] = 0; // 초기 이동력 0
-                        rData[`teams/${t}/tollgateCleared`] = false; // 검문소 초기화
+                        rData[`teams/${t}/chat`] = "Waiting for communication..."; 
+                        rData[`teams/${t}/movesLeft`] = 0; 
+                        rData[`teams/${t}/tollgateCleared`] = false;
                     }
                 });
                 db.ref(`rooms/${currentRoom}`).update(rData);
@@ -377,7 +396,6 @@
             document.querySelectorAll('.cell').forEach(e => e.remove());
             const targetObj = targets[currentRound - 1];
 
-            // 가이드 & 탐험가 UI 분기
             if(myRole === 'Guide' || myRole === 'Spectator') {
                 document.getElementById('guide-info-panel').style.display = 'block';
                 document.getElementById('guide-target-display').innerText = targetObj.name;
@@ -421,12 +439,10 @@
             } else { wrapper.style.display = 'none'; }
         }
 
-        // 실시간 업데이트 (무전기 내용, 이동력, 검문소, 위치)
         function updateGameScreen(data) {
             if(myTeam === 'none' || !data.teams || !data.teams[myTeam]) return;
             const tData = data.teams[myTeam];
             
-            // 위치 업데이트
             const wrapper = document.getElementById('player-wrapper');
             const sprite = document.getElementById('player-sprite');
             if(wrapper && tData.charX !== undefined) {
@@ -434,7 +450,6 @@
                 sprite.style.transform = `rotate(${tData.charDir * 90}deg)`;
             }
 
-            // 가이드 경로 업데이트
             if(myRole === 'Guide' && tData.path) {
                 document.querySelectorAll('.path-dot').forEach(e => e.remove());
                 const pathArr = tData.path.split('|');
@@ -445,28 +460,33 @@
                 });
             }
 
-            // 무전기(채팅) 업데이트
             if(tData.chat) {
                 document.getElementById('chat-display').innerHTML = tData.chat;
             }
 
-            // 탐험가 조종 패널 활성/비활성 제어 (이동력 기준)
             if(myRole === 'Explorer') {
                 const moves = tData.movesLeft || 0;
                 document.getElementById('moves-badge').innerText = `Moves: ${moves}`;
-                const btns = document.querySelectorAll('#explorer-controls button:not(#check-btn)');
+                
+                // [개선] 제자리 회전 버튼은 항상 켜두고, 전진/후진 버튼만 이동력 유무로 잠금 처리
+                const btnFwd = document.getElementById('btn-fwd');
+                const btnBwd = document.getElementById('btn-bwd');
+                const btnLeft = document.getElementById('btn-left');
+                const btnRight = document.getElementById('btn-right');
+
+                btnLeft.disabled = false;
+                btnRight.disabled = false;
+
                 if(moves > 0) {
-                    btns.forEach(b => b.disabled = false);
+                    btnFwd.disabled = false; btnBwd.disabled = false;
                 } else {
-                    btns.forEach(b => b.disabled = true);
+                    btnFwd.disabled = true; btnBwd.disabled = true;
                 }
             }
 
-            // 가이드 검문소 암호 노출 제어
             if(myRole === 'Guide') {
                 const pwdDisplay = document.getElementById('tollgate-password-display');
                 if(!tData.tollgateCleared && tData.charX === 2 && tData.charY === 2) {
-                    // 탐험가가 2,2(검문소)에 도착하면 가이드 화면에 암호가 번쩍임
                     pwdDisplay.style.display = 'block';
                     document.getElementById('secret-word').innerText = targets[currentRound-1].pwd;
                 } else {
@@ -475,7 +495,6 @@
             }
         }
 
-        // --- 무전기 발송 로직 ---
         function sendWalkieQuestion() {
             const q1 = document.getElementById('chat-q-1').value;
             const q2 = document.getElementById('chat-q-2').value;
@@ -483,23 +502,20 @@
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chat: msg });
         }
 
+        // [개선] 가이드가 답변을 보낼 때 기존 이동력을 덮어씀 (무한 누적 방지)
         function sendWalkieAnswer() {
             const a1 = document.getElementById('chat-a-1').value;
             const a2 = document.getElementById('chat-a-2').value;
-            const moves = parseInt(a2); // 1, 2, 3 블록
+            const moves = parseInt(a2); 
             const msg = `🗺️ Guide: "${a1} ${a2}"`;
             
-            // 답변 시 채팅창 갱신 및 탐험가에게 이동력 부여
-            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snap => {
-                let currentMoves = snap.val().movesLeft || 0;
-                db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
-                    chat: msg,
-                    movesLeft: currentMoves + moves // 누적
-                });
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
+                chat: msg,
+                movesLeft: moves 
             });
         }
 
-        // --- 조종 및 검문소(Tollgate) 로직 ---
+        // [개선] 방향 전환(Left, Right)은 에너지를 소모하지 않고, 오직 전진/후진만 소모함!
         function moveChar(action) {
             if (myRole !== 'Explorer') return; 
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snapshot => {
@@ -507,29 +523,30 @@
                 let nx = d.charX, ny = d.charY, nd = d.charDir;
                 let mLeft = d.movesLeft || 0;
 
-                if(mLeft <= 0) return; // 이동력 없으면 취소
-
-                if(action === 'left') nd = (nd + 3) % 4;
-                if(action === 'right') nd = (nd + 1) % 4;
-                if(action === 'forward' || action === 'backward') {
-                    let step = action === 'forward' ? 1 : -1;
-                    if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
+                // 회전: 이동력 차감 없이 방향만 바꾸고 함수 종료
+                if (action === 'left' || action === 'right') {
+                    nd = action === 'left' ? (nd + 3) % 4 : (nd + 1) % 4;
+                    db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charDir: nd });
+                    return; 
                 }
 
-                // 이동 가능 여부 체크
+                // 전진/후진: 이동력이 없으면 경고 후 종료
+                if (mLeft <= 0) {
+                    alert("No moves left! Send a message to your Guide.");
+                    return;
+                }
+
+                let step = action === 'forward' ? 1 : -1;
+                if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
+
                 if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && mapData[ny][nx] !== 3) {
-                    
-                    // 7번 타일(검문소) 충돌 체크
                     if(mapData[ny][nx] === 7 && !d.tollgateCleared) {
-                        // 위치는 업데이트하지만, 모달을 띄우고 조종을 막음
                         let newPath = d.path + `|${nx},${ny}`;
                         db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 }).then(() => {
                             document.getElementById('tollgate-modal').style.display = 'flex';
                         });
                         return;
                     }
-
-                    // 일반 이동
                     let newPath = d.path + `|${nx},${ny}`;
                     db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 });
                 } else {
@@ -540,12 +557,9 @@
             });
         }
 
-        // 검문소 암호 제출
         function submitTollgate() {
             const inputVal = document.getElementById('tollgate-input').value.trim().toLowerCase();
             const correctPwd = targets[currentRound-1].pwd.toLowerCase();
-
-            // 대소문자 무시, 마침표나 특수문자는 치고 안치고 허용을 위해 단순 포함/비교 (여기선 일치로 검사)
             if(inputVal.replace(/[?.!]/g, '') === correctPwd.replace(/[?.!]/g, '')) {
                 alert("Correct! The road is clear.");
                 document.getElementById('tollgate-modal').style.display = 'none';
