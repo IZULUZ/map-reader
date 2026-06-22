@@ -98,7 +98,6 @@
         
         #tollgate-password-display { font-size: 1.3rem; color: #ff007f; background: yellow; padding: 12px; border: 4px dashed black; border-radius: 15px; margin: 5px 0 15px 0; display: none; text-align: center; box-shadow: 3px 3px 0 black;}
         
-        /* 호스트 관전 대시보드 전용 스타일 */
         .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; margin-top: 15px;}
         .dash-card { background: white; color: black; border: 5px solid; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 5px 5px 0 rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between;}
         .dash-title { font-family: 'Fredoka One'; font-size: 1.8rem; margin-bottom: 5px; text-shadow: 1px 1px #eee;}
@@ -185,7 +184,6 @@
         </div>
     </div>
 
-    <!-- 호스트 관전 대시보드 화면 -->
     <div id="dashboard-screen" class="screen">
         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 15px; border: 2px solid #00f0ff;">
             <h2 style="color: #00f0ff; margin: 0; font-family: 'Fredoka One';">🎮 Live Dashboard</h2>
@@ -198,7 +196,6 @@
         <button type="button" class="btn-pink" id="dash-next-btn" style="margin-top: 30px; display: none; padding: 15px 40px; font-size: 1.5rem; box-shadow: 0 0 20px #ff007f;" onclick="hostNextRound()">START NEXT ROUND 🚀</button>
     </div>
 
-    <!-- 플레이어 게임 화면 -->
     <div id="game-screen" class="screen">
         <div class="game-header">
             <span id="round-info">Round 1/4</span>
@@ -275,13 +272,12 @@
                     <button type="button" id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')">↪️ Turn Right</button>
                 </div>
                 
-                <button type="button" class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 15px; display: none; padding: 15px;" onclick="sendMoveComplete()">✅ Move Complete</button>
-                <button type="button" class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 15px; display: none; padding: 15px; font-size: 1.3rem;">🚩 Location Check</button>
+                <button type="button" class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 10px; display: none; padding: 15px;" onclick="sendMoveComplete()">✅ Move Complete</button>
+                <button type="button" class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 10px; display: none; padding: 15px; font-size: 1.3rem;">🚩 Location Check</button>
             </div>
         </div>
     </div>
 
-    <!-- 검문소(Tollgate) 모달 (영어 전용, 난이도 하향) -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2 style="font-size: 2rem; margin-top: 0;">👮 Police Checkpoint</h2>
@@ -316,6 +312,7 @@
         <div class="glass-panel" style="margin-top: 30px;">
             <p id="lounge-status" style="font-size: 1.5rem; margin: 0; font-weight: bold; color: #00f0ff;">Waiting for the Host to start next round...</p>
         </div>
+        <button type="button" class="btn-pink" id="lounge-next-btn" style="margin-top: 25px; display: none; padding: 15px 50px; font-size: 1.5rem; box-shadow: 0 0 20px #ff007f;">START NEXT ROUND 🚀</button>
     </div>
 
     <div id="ending-screen" class="screen">
@@ -378,7 +375,6 @@
             [1, 1, 0, 0, 0]  
         ];
 
-        // 초등 5학년 난이도에 맞춰 검문소 구문 대폭 간소화, 한글 제거
         const buildingSpecs = [
             { id: 2, name: "HOSPITAL", emoji: "🏥", pwdType: "blank", pwdGuide: "Go straight.", pwdExplorer: "G_ st_ai_ht.", pwdAns: "gostraight", situation: "I have a cold. 🤧" },
             { id: 4, name: "SCHOOL", emoji: "🏫", pwdType: "combo", pwdGuide: "Go straight, Turn left, Go straight", pwdAns: "forward,left,forward", situation: "I have an English class! 🎒" },
@@ -481,29 +477,53 @@
             });
         }
 
+        // ★ [구조 고도화] 안전한 DOM Element 동적 결합 방식으로 캐릭터 무한 증식 버그 완벽 예방
         function renderWaitingRoom(players) {
             const container = document.getElementById('dynamic-team-container');
-            container.innerHTML = "";
-            let teamStats = {};
+            container.innerHTML = ""; 
+            
+            const teamNone = document.getElementById('team-none');
+            if (teamNone) {
+                teamNone.innerHTML = `<div class="team-title" style="color: white;">👀 Waiting Area (Spectators)</div>`;
+            }
 
+            let teamStats = {};
+            let boxes = {};
+
+            // 1. 필요한 팀 구조의 컴포넌트를 브라우저 동기 엘리먼트로 깨끗이 바인딩
             for(let i=0; i<hostTeamCount; i++) {
                 let tName = teamNames[i];
                 teamStats[tName] = 0;
                 let color = teamColors[i % teamColors.length];
-                container.innerHTML += `<div class="team-box" id="team-${tName}" ondragover="allowDrop(event)" ondrop="drop(event, '${tName}')" style="border-color: ${color};"><div class="team-title" style="color: ${color};">TEAM ${tName}</div></div>`;
+                
+                let box = document.createElement('div');
+                box.className = 'team-box';
+                box.id = `team-${tName}`;
+                box.style.borderColor = color;
+                box.innerHTML = `<div class="team-title" style="color: ${color};">TEAM ${tName}</div>`;
+                
+                container.appendChild(box);
+                boxes[tName] = box;
             }
 
             let total = 0; let allReady = true;
+            
+            // 2. 루프 생성 단계에서 appendChild를 동기적으로 직결하여 난반사 잔상 복제 완벽 차단
             for(let id in players) {
                 total++;
-                if(!players[id].ready && players[id].team !== 'none') allReady = false; 
-                if(players[id].team !== 'none') teamStats[players[id].team]++;
+                const p = players[id];
+                if(!p.ready && p.team !== 'none') allReady = false; 
+                if(p.team !== 'none') teamStats[p.team]++;
 
-                const p = players[id]; const div = document.createElement('div');
+                const div = document.createElement('div');
                 div.className = 'player-card'; div.draggable = (id === myId); div.id = id; div.ondragstart = drag;
                 div.innerHTML = `<img src="${p.charImg}" alt="char" onerror="this.style.display='none'"><span>${p.name} ${p.ready && p.team !== 'none' ? '✅' : ''}</span>`;
-                if(p.team === 'none') document.getElementById('team-none').appendChild(div);
-                else document.getElementById(`team-${p.team}`).appendChild(div);
+                
+                if(p.team === 'none') {
+                    document.getElementById('team-none').appendChild(div);
+                } else if(boxes[p.team]) {
+                    boxes[p.team].appendChild(div);
+                }
             }
 
             let isValid = true;
@@ -569,11 +589,6 @@
                 }
                 db.ref(`rooms/${currentRoom}`).update(rData);
             });
-        }
-
-        function getBuildingData(id) {
-            let t = globalTargets.find(obj => obj.id === id);
-            return t ? t : { emoji:'', name:'' };
         }
 
         function updateDashboard(data) {
@@ -802,7 +817,6 @@
             const a1 = document.getElementById('chat-a-1').value;
             const a2 = document.getElementById('chat-a-2').value;
             const moves = parseInt(a2); 
-            // 완벽한 문장 조합 "Go straight" + "2 blocks." -> "Go straight 2 blocks."
             const msg = `<div style="padding: 2px 0; border-bottom: 1px solid #ddd;"><span style="color:#006064;">[Guide] ${myName}:</span> ${a1} ${a2}</div>`;
             let currentLog = (localTeamData && localTeamData.chatLog) ? localTeamData.chatLog : " ";
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + msg, movesLeft: moves, lastSender: 'guide' });
@@ -874,7 +888,6 @@
             if(targetObj.pwdType === 'blank') {
                 const inputVal = document.getElementById('tollgate-input').value.trim().toLowerCase();
                 const correctPwd = targetObj.pwdAns.toLowerCase();
-                // 띄어쓰기, 구두점 제거 후 깔끔하게 비교
                 if(inputVal.replace(/[\s?.!]/g, '') === correctPwd.replace(/[\s?.!]/g, '')) isCorrect = true;
             } else {
                 if(myComboInput.join(',') === targetObj.pwdAns) isCorrect = true;
@@ -892,6 +905,38 @@
                 myComboInput = [];
                 document.getElementById('combo-display').innerText = "";
                 document.getElementById('tollgate-input').value = "";
+            }
+        }
+
+        // ★ [로직 수정] 방장이 직접 플레이 중일 때 대기실(Lounge)에서도 다음 라운드 진행 버튼을 노출하도록 처리
+        function showRoundLounge(data) {
+            switchScreen('lounge-screen'); clearInterval(timerInterval);
+            document.getElementById('lounge-title').innerText = `Round ${data.round} Cleared!`;
+            if(myTeam !== 'none' && data.teams && data.teams[myTeam]) {
+                let myTime = data.teams[myTeam].currentRoundTime; document.getElementById('lounge-my-time').innerText = formatTime(myTime);
+            }
+            
+            const loungeNextBtn = document.getElementById('lounge-next-btn');
+            if(data.status === 'round_end') {
+                if(isHost) {
+                    if(loungeNextBtn) {
+                        loungeNextBtn.style.display = 'block';
+                        if(data.round >= 4) {
+                            loungeNextBtn.innerText = "FINISH GAME 🏆";
+                            loungeNextBtn.onclick = () => location.reload();
+                        } else {
+                            loungeNextBtn.innerText = "START NEXT ROUND 🚀";
+                            loungeNextBtn.onclick = hostNextRound;
+                        }
+                    }
+                    document.getElementById('lounge-status').innerText = "All teams finished! Click the button to proceed.";
+                } else {
+                    if(loungeNextBtn) loungeNextBtn.style.display = 'none';
+                    document.getElementById('lounge-status').innerText = "All teams have finished! Waiting for Host...";
+                }
+            } else {
+                if(loungeNextBtn) loungeNextBtn.style.display = 'none';
+                document.getElementById('lounge-status').innerText = "Waiting for other teams...";
             }
         }
 
@@ -929,19 +974,6 @@
             });
         }
 
-        function showRoundLounge(data) {
-            switchScreen('lounge-screen'); clearInterval(timerInterval);
-            document.getElementById('lounge-title').innerText = `Round ${data.round} Cleared!`;
-            if(myTeam !== 'none' && data.teams && data.teams[myTeam]) {
-                let myTime = data.teams[myTeam].currentRoundTime; document.getElementById('lounge-my-time').innerText = formatTime(myTime);
-            }
-            if(data.status === 'round_end') {
-                document.getElementById('lounge-status').innerText = "Wait for the Host to start next round!";
-            } else {
-                document.getElementById('lounge-status').innerText = "Waiting for other teams...";
-            }
-        }
-
         function showFinalEnding(data) {
             switchScreen('ending-screen'); clearInterval(timerInterval);
             let html = "<h3 style='color: white; font-size: 2rem; margin-top: 0;'>Final Time Records</h3>";
@@ -965,8 +997,7 @@
                 const td = document.getElementById('timer-display');
                 if(td) td.innerText = formatTime(elapsed);
             }
-            // 대시보드 총 누적 시간 실시간 렌더링
-            if(gameStartTime > 0 && isHost && myTeam === 'none') {
+            if(gameStartTime > 0 && isHost) {
                 let totalElapsed = Math.floor((Date.now() - gameStartTime) / 1000);
                 const dt = document.getElementById('dash-timer');
                 if(dt) dt.innerText = "Total Time: " + formatTime(totalElapsed);
