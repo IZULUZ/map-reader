@@ -44,6 +44,7 @@
         .timer { color: #ff007f; font-size: 1.5rem; }
         
         .board-section { display: flex; flex-direction: column; align-items: center; background: #fff9e6; border: 4px solid black; border-radius: 20px; padding: 15px; width: 100%; max-width: 500px; box-sizing: border-box;}
+        
         #target-banner { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.3rem; color: #ff007f; background: white; padding: 5px 15px; border-radius: 10px; border: 3px solid black; margin-bottom: 10px; text-align: center; width: 100%; box-sizing: border-box; }
         
         .grid-board { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 2px; background: black; border: 4px solid black; position: relative; margin-bottom: 10px;}
@@ -89,7 +90,7 @@
         .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center;}
         .modal-box { background: white; color: black; border: 5px solid #ff007f; border-radius: 20px; padding: 20px; width: 85%; max-width: 600px; font-family: 'Fredoka One'; max-height: 80vh; overflow-y: auto;}
         
-        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 10px 0; display: none; text-align: center;}
+        #tollgate-password-display { font-size: 1.5rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 5px 0; display: none; text-align: center;}
         
         .howto-section { text-align: left; margin-bottom: 20px; padding: 10px; border-left: 5px solid #00f0ff; background: #f0f0f0; border-radius: 0 10px 10px 0;}
     </style>
@@ -164,6 +165,7 @@
                 
                 <div class="chat-history" id="chat-display"></div>
                 
+                <!-- Explorer Chat Form -->
                 <div id="explorer-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-q-1">
                         <option value="How can I get to">How can I get to</option>
@@ -178,6 +180,7 @@
                     <button class="btn-cyan" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieQuestion()">SEND</button>
                 </div>
 
+                <!-- Guide Direction Form -->
                 <div id="guide-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-a-1">
                         <option value="Go straight">Go straight</option>
@@ -192,6 +195,7 @@
                     <button class="btn-yellow" id="guide-send-btn" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieAnswer()">SEND</button>
                 </div>
 
+                <!-- Guide Arrival Signal Form -->
                 <div id="guide-arrival-form" style="display: none; margin-top: 5px;" class="walkie-inputs">
                     <select id="chat-arrival">
                         <option value="It's on your left.">It's on your left.</option>
@@ -212,6 +216,7 @@
                 </div>
             </div>
 
+            <!-- Explorer Controls -->
             <div id="explorer-controls" style="display: none; width: 100%;">
                 <div class="controls">
                     <button id="btn-fwd" style="background: var(--btn-forward)" onclick="moveChar('forward')" disabled>⬆️ Forward</button>
@@ -226,6 +231,7 @@
         </div>
     </div>
 
+    <!-- Tollgate Modal -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2>👮 Police Checkpoint</h2>
@@ -235,6 +241,7 @@
         </div>
     </div>
 
+    <!-- Lounge Screen -->
     <div id="lounge-screen" class="screen">
         <h2 id="lounge-title" style="color: #39ff14; font-size: 3rem;">Round Cleared!</h2>
         <div class="result-box">
@@ -245,12 +252,14 @@
         <button class="btn-cyan" id="lounge-next-btn" style="display: none; margin-top: 20px; font-size: 1.5rem;">START NEXT ROUND</button>
     </div>
 
+    <!-- Ending Screen -->
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">SUCCESS!</h2>
         <div id="ending-results" class="result-box"></div>
         <button class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
+    <!-- How to Play Modal -->
     <div id="howto-modal" class="modal">
         <div class="modal-box">
             <h2 style="color: #00f0ff; margin-top: 0; text-shadow: 2px 2px black;">❓ HOW TO PLAY</h2>
@@ -289,13 +298,14 @@
         let isHost = false; let myTeam = "none"; let myRole = "";
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
 
-        // ★ [맵 레이아웃 재설계] 모든 목적지로의 진입은 중앙 검문소[2,2]를 무조건 거쳐가게 설계
+        // ★ [맵 레이아웃 재설계] 모든 목적지로의 진입은 중앙 검문소[2,2]를 무조건 거쳐가게 연결 (십자 도로)
+        // 0:도로, 1:잔디, 2:Hosp, 4:School, 5:Bank, 6:Park, 7:Checkpoint
         const mapData = [
-            [2, 1, 1, 1, 4], // y=0: Hospital[0,0], School[4,0]
-            [0, 1, 1, 1, 0], // y=1: 외길 세로축 도로망
-            [0, 0, 7, 0, 0], // y=2: Bank[0,2], Checkpoint[2,2], Park[4,2]
-            [1, 1, 0, 1, 1], // y=3: 중앙 통로 유도축
-            [1, 1, 0, 0, 0]  // y=4: 시작점 [4,4] 도로 연결망 완료
+            [2, 0, 0, 0, 4], // y=0: Hospital[0,0], 도로[1,0]~[3,0], School[4,0]
+            [1, 1, 0, 1, 1], // y=1: 세로 도로 [2,1]
+            [5, 0, 7, 0, 6], // y=2: Bank[0,2], 도로[1,2], Checkpoint[2,2], 도로[3,2], Park[4,2]
+            [1, 1, 0, 1, 1], // y=3: 세로 도로 [2,3]
+            [1, 1, 0, 0, 0]  // y=4: 도로 [2,4]~[4,4], 시작점 [4,4]
         ];
         
         const targets = [
@@ -646,15 +656,11 @@
             });
         }
 
-        // ★ [동적 바인딩 버그 수정] 방 루트 노드를 탐색하여 라운드와 팀 상태를 결합 분석
+        // ★ [가장 중요한 변경점] 모든 건물은 자유롭게 밟을 수 있게 허용 (0,2,4,5,6,7)
         function moveChar(action) {
             if (myRole !== 'Explorer') return; 
-            db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
-                let roomData = snapshot.val();
-                if(!roomData || !roomData.teams || !roomData.teams[myTeam]) return;
-
-                let d = roomData.teams[myTeam];
-                let roundNum = roomData.round || 1;
+            db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snapshot => {
+                let d = snapshot.val();
                 let nx = d.charX, ny = d.charY, nd = d.charDir;
                 let mLeft = d.movesLeft || 0;
 
@@ -669,8 +675,8 @@
                 let step = action === 'forward' ? 1 : -1;
                 if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
 
-                let targetId = targets[roundNum - 1].id;
-                let allowedCells = [0, 7, targetId];
+                // 정답 건물만 허용하는 것이 아니라, 맵 상의 모든 건물을 통행/진입 가능하도록 배열 허용
+                let allowedCells = [0, 2, 4, 5, 6, 7]; // 0:도로, 7:검문소, 2,4,5,6:모든 목적지 건물
 
                 if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && allowedCells.includes(mapData[ny][nx])) {
                     if(mapData[ny][nx] === 7 && !d.tollgateCleared) {
@@ -683,7 +689,6 @@
                     let newPath = d.path ? (d.path + `|${nx},${ny}`) : `${nx},${ny}`;
                     db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 });
                 } else {
-                    // 도로를 이탈할 때 실시간으로 소통 로그에 기록 연동 처리
                     let currentLog = d.chatLog || "";
                     let errorMsg = `<div style="padding: 2px 0;"><span style="color:red; font-weight:bold;">⚠️ [System]:</span> Out of road! You can only walk on the road.</div>`;
                     db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + errorMsg });
