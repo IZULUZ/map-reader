@@ -43,9 +43,10 @@
         .char-option img { width: 100%; height: 100%; object-fit: contain; }
         
         .team-container { display: flex; gap: 15px; width: 100%; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
-        .team-box { width: 230px; min-height: 130px; border: 5px solid white; border-radius: 20px; padding: 10px; background: rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 8px; align-items: center; position: relative; box-shadow: 0 8px 15px rgba(0,0,0,0.3);}
-        .team-title { font-family: 'Fredoka One'; font-size: 1.4rem; text-align: center; margin-bottom: 5px; text-shadow: 2px 2px black;}
-        .player-card { background: white; color: black; border: 3px solid black; border-radius: 12px; padding: 6px 10px; width: 90%; cursor: grab; display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 0.95rem; box-shadow: 2px 2px 0px black;}
+        .team-box { width: 230px; min-height: 130px; border: 5px solid white; border-radius: 20px; padding: 10px; background: rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 8px; align-items: center; position: relative; box-shadow: 0 8px 15px rgba(0,0,0,0.3); cursor: pointer; transition: transform 0.1s;}
+        .team-box:active { transform: scale(0.97); }
+        .team-title { font-family: 'Fredoka One'; font-size: 1.4rem; text-align: center; margin-bottom: 5px; text-shadow: 2px 2px black; pointer-events: none;}
+        .player-card { background: white; color: black; border: 3px solid black; border-radius: 12px; padding: 6px 10px; width: 90%; cursor: grab; display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 0.95rem; box-shadow: 2px 2px 0px black; pointer-events: none;}
         .player-card img { width: 32px; height: 32px; object-fit: contain; background: #eee; border-radius: 8px; }
 
         .game-header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; background: white; color: black; border: 4px solid black; border-radius: 15px; padding: 10px 20px; margin-bottom: 10px; font-family: 'Fredoka One'; font-size: 1.2rem; box-sizing: border-box; box-shadow: 4px 4px 0 black;}
@@ -166,14 +167,14 @@
             <div style="width:85px;"></div>
         </div>
         <div class="glass-panel" style="width: 100%; padding: 10px 20px;">
-            <p style="margin: 5px 0; font-size: 1.1rem; font-weight: bold;">👇 Drag your character card to your Team!</p>
+            <p style="margin: 5px 0; font-size: 1.1rem; font-weight: bold;">👇 Drag your card, OR <span style="color:#39ff14;">TAP a Team Box</span> to join!</p>
             <p style="margin: 0; font-size:0.95rem; color:#ffeb3b;">Host can stay in 'Waiting Area' to be a Dashboard Spectator!</p>
         </div>
         
         <div class="team-container" id="dynamic-team-container"></div>
         
         <div style="width: 100%; display:flex; justify-content: center; margin-top: 15px;">
-            <div class="team-box" id="team-none" style="width: 100%; max-width: 500px; border-color: gray; background: rgba(255,255,255,0.1);" ondragover="allowDrop(event)" ondrop="drop(event, 'none')">
+            <div class="team-box" id="team-none" style="width: 100%; max-width: 500px; border-color: gray; background: rgba(255,255,255,0.1);" ondragover="allowDrop(event)" ondrop="drop(event, 'none')" onclick="tapTeamBox('none')">
                 <div class="team-title" style="color: white;">👀 Waiting Area (Spectators)</div>
             </div>
         </div>
@@ -184,6 +185,7 @@
         </div>
     </div>
 
+    <!-- 4. Host Dashboard Screen -->
     <div id="dashboard-screen" class="screen">
         <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 15px; border: 2px solid #00f0ff;">
             <h2 style="color: #00f0ff; margin: 0; font-family: 'Fredoka One';">🎮 Live Dashboard</h2>
@@ -196,6 +198,7 @@
         <button type="button" class="btn-pink" id="dash-next-btn" style="margin-top: 30px; display: none; padding: 15px 40px; font-size: 1.5rem; box-shadow: 0 0 20px #ff007f;" onclick="hostNextRound()">START NEXT ROUND 🚀</button>
     </div>
 
+    <!-- 5. Game Screen -->
     <div id="game-screen" class="screen">
         <div class="game-header">
             <span id="round-info">Round 1/4</span>
@@ -272,12 +275,13 @@
                     <button type="button" id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')">↪️ Turn Right</button>
                 </div>
                 
-                <button type="button" class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 10px; display: none; padding: 15px;" onclick="sendMoveComplete()">✅ Move Complete</button>
-                <button type="button" class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 10px; display: none; padding: 15px; font-size: 1.3rem;">🚩 Location Check</button>
+                <button type="button" class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 15px; display: none; padding: 15px;" onclick="sendMoveComplete()">✅ Move Complete</button>
+                <button type="button" class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 15px; display: none; padding: 15px; font-size: 1.3rem;">🚩 Location Check</button>
             </div>
         </div>
     </div>
 
+    <!-- Tollgate Modal -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2 style="font-size: 2rem; margin-top: 0;">👮 Police Checkpoint</h2>
@@ -303,6 +307,7 @@
         </div>
     </div>
 
+    <!-- Lounge Screen -->
     <div id="lounge-screen" class="screen">
         <h2 id="lounge-title" style="color: #39ff14; font-size: 3.5rem; text-shadow: 3px 3px black; text-align: center;">Round Cleared!</h2>
         <div class="result-box" style="background: rgba(0,0,0,0.6);">
@@ -315,12 +320,14 @@
         <button type="button" class="btn-pink" id="lounge-next-btn" style="margin-top: 25px; display: none; padding: 15px 50px; font-size: 1.5rem; box-shadow: 0 0 20px #ff007f;">START NEXT ROUND 🚀</button>
     </div>
 
+    <!-- Ending Screen -->
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4.5rem; margin-bottom: 0; text-shadow: 4px 4px black; text-align: center;">SUCCESS! 🎉</h2>
         <div id="ending-results" class="result-box" style="max-height: 50vh; overflow-y: auto; background: rgba(0,0,0,0.8); border: 5px solid yellow;"></div>
         <button type="button" class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
+    <!-- How to Play Modal -->
     <div id="howto-modal" class="modal">
         <div class="modal-box">
             <h2 style="color: #00f0ff; margin-top: 0; text-shadow: 2px 2px black; font-size: 2rem;">❓ HOW TO PLAY</h2>
@@ -359,6 +366,7 @@
         let isHost = false; let myTeam = "none"; let myRole = ""; let myTeamColor = "white";
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1; let gameStartTime = 0;
         let localTeamData = null;
+        let isJoining = false;
         
         let hostTeamCount = 2; 
         const teamNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
@@ -415,16 +423,19 @@
         }
 
         function joinRoom() {
+            if(isJoining) return;
             const code = document.getElementById('room-code-input').value.trim();
             if(code.length !== 4) return alert("Enter 4 digits!");
+            isJoining = true;
             currentRoom = code; 
             db.ref(`rooms/${currentRoom}`).once('value').then(snap => {
+                isJoining = false;
                 if(!snap.exists()) { alert("Room not found!"); currentRoom = ""; return; }
                 let d = snap.val();
                 if(d.teamCount) hostTeamCount = d.teamCount;
                 joinDbRoom(); switchScreen('room-screen');
                 document.getElementById('room-code-display').innerText = currentRoom;
-            });
+            }).catch(() => { isJoining = false; });
         }
 
         function leaveRoom() {
@@ -432,6 +443,9 @@
             db.ref(`rooms/${currentRoom}/players/${myId}`).remove().then(() => {
                 db.ref(`rooms/${currentRoom}`).off(); 
                 currentRoom = ""; myTeam = "none"; myRole = ""; localTeamData = null; myTeamColor = "white";
+                // 잔상 초기화
+                document.getElementById('dynamic-team-container').innerHTML = "";
+                document.querySelectorAll('.player-card').forEach(c => c.remove());
                 switchScreen('lobby-screen');
             });
         }
@@ -477,52 +491,77 @@
             });
         }
 
-        // ★ [구조 고도화] 안전한 DOM Element 동적 결합 방식으로 캐릭터 무한 증식 버그 완벽 예방
+        // ★ [핵심 1] 터치 입력 지원 (드래그 없이 박스 탭만으로 입장)
+        function tapTeamBox(teamName) {
+            if(!currentRoom) return;
+            myTeam = teamName;
+            if(teamName !== 'none') {
+                myTeamColor = teamColors[teamNames.indexOf(teamName) % teamColors.length];
+            } else { 
+                myTeamColor = "white"; 
+            }
+            db.ref(`rooms/${currentRoom}/players/${myId}`).update({ team: teamName, ready: false });
+        }
+
+        // ★ [핵심 2] 스마트 DOM 교체로 클론(복제) 버그 완전 차단
         function renderWaitingRoom(players) {
             const container = document.getElementById('dynamic-team-container');
-            container.innerHTML = ""; 
             
-            const teamNone = document.getElementById('team-none');
-            if (teamNone) {
-                teamNone.innerHTML = `<div class="team-title" style="color: white;">👀 Waiting Area (Spectators)</div>`;
+            // 1. 필요한 팀 박스만 1회 생성 (존재하지 않을 때만)
+            if (container.children.length === 0) {
+                for(let i=0; i<hostTeamCount; i++) {
+                    let tName = teamNames[i];
+                    let color = teamColors[i % teamColors.length];
+                    
+                    let box = document.createElement('div');
+                    box.className = 'team-box';
+                    box.id = `team-${tName}`;
+                    box.style.borderColor = color;
+                    box.setAttribute('ondragover', 'allowDrop(event)');
+                    box.setAttribute('ondrop', `drop(event, '${tName}')`);
+                    box.setAttribute('onclick', `tapTeamBox('${tName}')`);
+                    box.innerHTML = `<div class="team-title" style="color: ${color};">TEAM ${tName}</div>`;
+                    container.appendChild(box);
+                }
             }
+
+            // 2. 나간 플레이어 카드 삭제 (가비지 컬렉션)
+            const existingCards = document.querySelectorAll('.player-card');
+            let currentIds = new Set(Object.keys(players || {}));
+            existingCards.forEach(card => {
+                if (!currentIds.has(card.id)) {
+                    card.remove();
+                }
+            });
 
             let teamStats = {};
-            let boxes = {};
+            for(let i=0; i<hostTeamCount; i++) teamStats[teamNames[i]] = 0;
 
-            // 1. 필요한 팀 구조의 컴포넌트를 브라우저 동기 엘리먼트로 깨끗이 바인딩
-            for(let i=0; i<hostTeamCount; i++) {
-                let tName = teamNames[i];
-                teamStats[tName] = 0;
-                let color = teamColors[i % teamColors.length];
-                
-                let box = document.createElement('div');
-                box.className = 'team-box';
-                box.id = `team-${tName}`;
-                box.style.borderColor = color;
-                box.innerHTML = `<div class="team-title" style="color: ${color};">TEAM ${tName}</div>`;
-                
-                container.appendChild(box);
-                boxes[tName] = box;
-            }
+            let allReady = true;
 
-            let total = 0; let allReady = true;
-            
-            // 2. 루프 생성 단계에서 appendChild를 동기적으로 직결하여 난반사 잔상 복제 완벽 차단
+            // 3. 현재 접속자 상태 갱신 및 위치 이동 (Diffing)
             for(let id in players) {
-                total++;
                 const p = players[id];
                 if(!p.ready && p.team !== 'none') allReady = false; 
-                if(p.team !== 'none') teamStats[p.team]++;
+                if(p.team !== 'none' && teamStats[p.team] !== undefined) teamStats[p.team]++;
 
-                const div = document.createElement('div');
-                div.className = 'player-card'; div.draggable = (id === myId); div.id = id; div.ondragstart = drag;
-                div.innerHTML = `<img src="${p.charImg}" alt="char" onerror="this.style.display='none'"><span>${p.name} ${p.ready && p.team !== 'none' ? '✅' : ''}</span>`;
+                let card = document.getElementById(id);
+                if (!card) {
+                    // 최초 입장 시 카드 생성
+                    card = document.createElement('div');
+                    card.className = 'player-card';
+                    card.draggable = (id === myId); // 본인 카드만 드래그 가능
+                    card.id = id;
+                    card.ondragstart = drag;
+                }
+
+                // 텍스트/상태만 업데이트
+                card.innerHTML = `<img src="${p.charImg}" alt="char" onerror="this.style.display='none'"><span>${p.name} ${p.ready && p.team !== 'none' ? '✅' : ''}</span>`;
                 
-                if(p.team === 'none') {
-                    document.getElementById('team-none').appendChild(div);
-                } else if(boxes[p.team]) {
-                    boxes[p.team].appendChild(div);
+                // 팀 박스 소속이 달라진 경우에만 위치 이동 (드래그 중단 방지)
+                let targetBox = document.getElementById(p.team === 'none' ? 'team-none' : `team-${p.team}`);
+                if (targetBox && card.parentElement !== targetBox) {
+                    targetBox.appendChild(card);
                 }
             }
 
@@ -551,11 +590,8 @@
         function drag(ev) { ev.dataTransfer.setData("text", ev.target.id); }
         function allowDrop(ev) { ev.preventDefault(); }
         function drop(ev, teamName) {
-            ev.preventDefault(); myTeam = teamName;
-            if(teamName !== 'none') {
-                myTeamColor = teamColors[teamNames.indexOf(teamName) % teamColors.length];
-            } else { myTeamColor = "white"; }
-            db.ref(`rooms/${currentRoom}/players/${myId}`).update({ team: teamName, ready: false });
+            ev.preventDefault(); 
+            tapTeamBox(teamName);
         }
 
         function toggleReady() {
@@ -589,6 +625,11 @@
                 }
                 db.ref(`rooms/${currentRoom}`).update(rData);
             });
+        }
+
+        function getBuildingData(id) {
+            let t = globalTargets.find(obj => obj.id === id);
+            return t ? t : { emoji:'', name:'' };
         }
 
         function updateDashboard(data) {
