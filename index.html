@@ -61,7 +61,6 @@
         .char-sprite { width: 40px; height: 40px; object-fit: contain; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
         .char-name-tag { position: absolute; bottom: -8px; background: rgba(0,0,0,0.8); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; white-space: nowrap; }
         
-        /* 잘못된 경로 이동 시 빨갛게 흔들리는 애니메이션 */
         @keyframes shakeError {
             0% { transform: translateX(0); filter: drop-shadow(0 0 10px red); }
             25% { transform: translateX(-5px); filter: drop-shadow(0 0 15px red) sepia(1) hue-rotate(-50deg) saturate(5); }
@@ -166,7 +165,6 @@
                 
                 <div class="chat-history" id="chat-display"></div>
                 
-                <!-- Explorer Chat Form -->
                 <div id="explorer-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-q-1">
                         <option value="How can I get to">How can I get to</option>
@@ -181,7 +179,6 @@
                     <button class="btn-cyan" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieQuestion()">SEND</button>
                 </div>
 
-                <!-- Guide Direction Form -->
                 <div id="guide-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-a-1">
                         <option value="Go straight">Go straight</option>
@@ -196,7 +193,6 @@
                     <button class="btn-yellow" id="guide-send-btn" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieAnswer()">SEND</button>
                 </div>
 
-                <!-- Guide Arrival Signal Form -->
                 <div id="guide-arrival-form" style="display: none; margin-top: 5px;" class="walkie-inputs">
                     <select id="chat-arrival">
                         <option value="It's on your left.">It's on your left.</option>
@@ -217,7 +213,6 @@
                 </div>
             </div>
 
-            <!-- Explorer Controls -->
             <div id="explorer-controls" style="display: none; width: 100%;">
                 <div class="controls">
                     <button id="btn-fwd" style="background: var(--btn-forward)" onclick="moveChar('forward')" disabled>⬆️ Forward</button>
@@ -232,7 +227,6 @@
         </div>
     </div>
 
-    <!-- Tollgate Modal -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
             <h2>👮 Police Checkpoint</h2>
@@ -242,7 +236,6 @@
         </div>
     </div>
 
-    <!-- Lounge Screen -->
     <div id="lounge-screen" class="screen">
         <h2 id="lounge-title" style="color: #39ff14; font-size: 3rem;">Round Cleared!</h2>
         <div class="result-box">
@@ -253,14 +246,12 @@
         <button class="btn-cyan" id="lounge-next-btn" style="display: none; margin-top: 20px; font-size: 1.5rem;">START NEXT ROUND</button>
     </div>
 
-    <!-- Ending Screen -->
     <div id="ending-screen" class="screen">
         <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">SUCCESS!</h2>
         <div id="ending-results" class="result-box"></div>
         <button class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
-    <!-- How to Play Modal -->
     <div id="howto-modal" class="modal">
         <div class="modal-box">
             <h2 style="color: #00f0ff; margin-top: 0; text-shadow: 2px 2px black;">❓ HOW TO PLAY</h2>
@@ -299,13 +290,12 @@
         let isHost = false; let myTeam = "none"; let myRole = "";
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
 
-        // ★ [맵 재설계] 시작점[4,4] 잔디밭 -> 도로[0]로 수정하여 시작 시 길 이탈 오류 원천 방지
         const mapData = [
             [2, 0, 0, 3, 4],
             [1, 3, 0, 1, 0],
             [5, 0, 7, 0, 0], 
             [1, 0, 1, 3, 0],
-            [0, 0, 0, 6, 0] // <- [4,4] 도로
+            [0, 0, 0, 6, 0] 
         ];
         
         const targets = [
@@ -564,7 +554,6 @@
                 if(moves > 0) { btnFwd.disabled = false; btnBwd.disabled = false; } 
                 else { btnFwd.disabled = true; btnBwd.disabled = true; }
 
-                // 버튼 가시성 완벽 분리
                 if(tData.arrivalSignaled) {
                     checkBtn.style.display = 'block';
                     promptEl.innerText = "👉 Guide signaled! Check Location!";
@@ -657,6 +646,7 @@
             });
         }
 
+        // ★ [버그 완벽 수정 및 개선]
         function moveChar(action) {
             if (myRole !== 'Explorer') return; 
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).once('value').then(snapshot => {
@@ -675,7 +665,8 @@
                 let step = action === 'forward' ? 1 : -1;
                 if(nd === 0) ny -= step; else if(nd === 1) nx += step; else if(nd === 2) ny += step; else if(nd === 3) nx -= step;
 
-                let targetId = targets[d.round - 1].id;
+                // [수정 포인트] 스냅샷 'd'가 아닌 전역 변수 'currentRound'로 라운드 데이터를 안전하게 로드합니다.
+                let targetId = targets[currentRound - 1].id; 
                 let allowedCells = [0, 7, targetId];
 
                 if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && allowedCells.includes(mapData[ny][nx])) {
@@ -689,7 +680,7 @@
                     let newPath = d.path + `|${nx},${ny}`;
                     db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 });
                 } else {
-                    // ★ 잘못된 길 진입 시 시스템 메시지 발송 및 애니메이션
+                    // 이제 비정상 이동 차단 시 정상적으로 에러 로그가 발송됩니다.
                     let currentLog = d.chatLog || "";
                     let errorMsg = `<div style="padding: 2px 0;"><span style="color:red; font-weight:bold;">⚠️ [System]:</span> Out of road! You can only walk on the road.</div>`;
                     db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + errorMsg });
