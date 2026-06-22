@@ -10,18 +10,21 @@
 
     <style>
         :root {
-            --bg: #2d004b; --grid-road: #dcdcdc; --grid-grass: #c1f0c1;
+            --bg: linear-gradient(135deg, #1a0033, #4b0082); 
+            --grid-road: #dcdcdc; --grid-grass: #c1f0c1;
             --btn-forward: #00f0ff; --btn-backward: #ffb3d9; --btn-right: #ffeb3b; --btn-left: #ff8c00;
         }
-        body { margin: 0; font-family: 'Nunito', sans-serif; background-color: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-y: auto; padding-bottom: 40px; box-sizing: border-box; user-select: none; }
-        h1 { font-family: 'Fredoka One', cursive; font-size: 2.5rem; color: #ff007f; text-shadow: 2px 2px white, 4px 4px #00f0ff; margin: 5px 0; }
+        body { margin: 0; font-family: 'Nunito', sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; align-items: center; min-height: 100vh; overflow-y: auto; padding-bottom: 40px; box-sizing: border-box; user-select: none; }
+        h1 { font-family: 'Fredoka One', cursive; font-size: 2.8rem; color: #ff007f; text-shadow: 2px 2px white, 4px 4px #00f0ff; margin: 15px 0; text-align: center;}
         
-        .screen { display: none; width: 100%; max-width: 1000px; flex-direction: column; align-items: center; padding: 10px; box-sizing: border-box; }
+        .screen { display: none; width: 100%; max-width: 1000px; flex-direction: column; align-items: center; padding: 10px; box-sizing: border-box; animation: fadeIn 0.4s ease-in-out; }
         .active { display: flex; }
 
-        button { font-family: 'Fredoka One', cursive; font-size: 1.2rem; padding: 12px 20px; border: 4px solid black; border-radius: 15px; cursor: pointer; box-shadow: 4px 4px black; transition: transform 0.1s; }
-        button:active { transform: translate(4px, 4px); box-shadow: none; }
-        button:disabled { filter: grayscale(100%); cursor: not-allowed; box-shadow: none; transform: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        button { font-family: 'Fredoka One', cursive; font-size: 1.2rem; padding: 12px 20px; border: 4px solid rgba(0,0,0,0.8); border-radius: 20px; cursor: pointer; box-shadow: 0 6px 0 rgba(0,0,0,0.8); transition: all 0.1s; }
+        button:active { transform: translateY(6px); box-shadow: 0 0 0 rgba(0,0,0,0.8); }
+        button:disabled { filter: grayscale(100%); cursor: not-allowed; transform: none; box-shadow: 0 6px 0 rgba(0,0,0,0.8); opacity: 0.7; }
         
         .btn-pink { background-color: #ff007f; color: white; }
         .btn-cyan { background-color: #00f0ff; color: black; }
@@ -29,37 +32,40 @@
         .btn-red { background-color: #ff4444; color: white; }
         .btn-green { background-color: #39ff14; color: black; }
 
-        input, select { font-family: 'Nunito', sans-serif; font-size: 1.2rem; padding: 10px; border: 4px solid black; border-radius: 10px; text-align: center; margin-bottom: 10px; }
+        input, select { font-family: 'Nunito', sans-serif; font-size: 1.2rem; padding: 12px; border: 4px solid black; border-radius: 15px; text-align: center; margin-bottom: 10px; box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1); outline: none;}
         
+        .glass-panel { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.3); border-radius: 20px; padding: 20px; text-align: center; box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+
         .char-selection-container { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;}
-        .char-option { width: 70px; height: 70px; border: 4px solid white; border-radius: 15px; background-color: rgba(255,255,255,0.2); cursor: pointer; overflow: hidden; display: flex; justify-content: center; align-items: center; position: relative; }
-        .char-option.selected { border-color: #39ff14; background-color: rgba(57,255,20,0.3); box-shadow: 0 0 15px #39ff14; }
+        .char-option { width: 75px; height: 75px; border: 4px solid white; border-radius: 20px; background-color: rgba(255,255,255,0.2); cursor: pointer; overflow: hidden; display: flex; justify-content: center; align-items: center; position: relative; transition: transform 0.2s;}
+        .char-option:hover { transform: scale(1.1); }
+        .char-option.selected { border-color: #39ff14; background-color: rgba(57,255,20,0.4); box-shadow: 0 0 20px #39ff14; transform: scale(1.1); }
         .char-option img { width: 100%; height: 100%; object-fit: contain; }
         
         .team-container { display: flex; gap: 15px; width: 100%; justify-content: center; margin-top: 10px; flex-wrap: wrap; }
-        .team-box { width: 220px; min-height: 120px; border: 4px dashed white; border-radius: 15px; padding: 10px; background: rgba(255,255,255,0.1); display: flex; flex-direction: column; gap: 8px; align-items: center; position: relative; }
-        .team-title { font-family: 'Fredoka One'; font-size: 1.3rem; text-align: center; margin-bottom: 5px; }
-        .player-card { background: white; color: black; border: 3px solid black; border-radius: 8px; padding: 5px 8px; width: 90%; cursor: grab; display: flex; align-items: center; gap: 8px; font-weight: 900; font-size: 0.9rem;}
-        .player-card img { width: 30px; height: 30px; object-fit: contain; background: #eee; border-radius: 5px; }
+        .team-box { width: 230px; min-height: 130px; border: 5px solid white; border-radius: 20px; padding: 10px; background: rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 8px; align-items: center; position: relative; box-shadow: 0 8px 15px rgba(0,0,0,0.3);}
+        .team-title { font-family: 'Fredoka One'; font-size: 1.4rem; text-align: center; margin-bottom: 5px; text-shadow: 2px 2px black;}
+        .player-card { background: white; color: black; border: 3px solid black; border-radius: 12px; padding: 6px 10px; width: 90%; cursor: grab; display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 0.95rem; box-shadow: 2px 2px 0px black;}
+        .player-card img { width: 32px; height: 32px; object-fit: contain; background: #eee; border-radius: 8px; }
 
-        .game-header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; background: white; color: black; border: 4px solid black; border-radius: 10px; padding: 10px 20px; margin-bottom: 5px; font-family: 'Fredoka One'; font-size: 1.2rem; box-sizing: border-box;}
-        .timer { color: #ff007f; font-size: 1.5rem; }
+        .game-header { display: flex; justify-content: space-between; width: 100%; max-width: 500px; background: white; color: black; border: 4px solid black; border-radius: 15px; padding: 10px 20px; margin-bottom: 10px; font-family: 'Fredoka One'; font-size: 1.2rem; box-sizing: border-box; box-shadow: 4px 4px 0 black;}
+        .timer { color: #ff007f; font-size: 1.6rem; }
         
-        .board-section { display: flex; flex-direction: column; align-items: center; background: #fff9e6; border: 4px solid black; border-radius: 20px; padding: 15px; width: 100%; max-width: 500px; box-sizing: border-box;}
-        #target-banner { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.2rem; color: #ff007f; background: white; padding: 5px 10px; border-radius: 10px; border: 3px solid black; margin-bottom: 10px; text-align: center; width: 100%; box-sizing: border-box; }
+        .board-section { display: flex; flex-direction: column; align-items: center; background: #fff9e6; border: 5px solid black; border-radius: 25px; padding: 15px; width: 100%; max-width: 500px; box-sizing: border-box; box-shadow: 8px 8px 0 rgba(0,0,0,0.5);}
+        #target-banner { font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.2rem; color: #ff007f; background: white; padding: 8px 15px; border-radius: 12px; border: 3px solid black; margin-bottom: 15px; text-align: center; width: 100%; box-sizing: border-box; box-shadow: 3px 3px 0 black;}
         
-        .grid-board { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 2px; background: black; border: 4px solid black; position: relative; margin-bottom: 10px;}
-        .cell { width: 55px; height: 55px; background-color: var(--grid-grass); display: flex; justify-content: center; align-items: center; position: relative; z-index: 1;}
+        .grid-board { display: grid; grid-template-columns: repeat(5, 55px); grid-template-rows: repeat(5, 55px); gap: 2px; background: black; border: 5px solid black; border-radius: 10px; position: relative; margin-bottom: 15px; box-shadow: 4px 4px 0 rgba(0,0,0,0.2);}
+        .cell { width: 55px; height: 55px; background-color: var(--grid-grass); display: flex; justify-content: center; align-items: center; position: relative; z-index: 1; border-radius: 2px;}
         
         .road { background-color: var(--grid-road); background-image: url('road.png'); background-size: cover; }
         .obstacle-cell { background-image: url('obstacle.png'); background-size: cover; }
-        .building-cell { position: relative; background-size: cover; }
+        .building-cell { position: relative; background-size: cover; border: 2px solid rgba(0,0,0,0.1); border-radius: 5px;}
         .tollgate-cell { background-color: #ffcccc; border: 2px dashed red; } 
-        .map-label { position:absolute; bottom:2px; font-size:0.5rem; color:black; font-family:'Fredoka One'; background:rgba(255,255,255,0.8); padding:1px 3px; border-radius:3px; letter-spacing:0.5px; }
+        .map-label { position:absolute; bottom:2px; font-size:0.55rem; color:black; font-family:'Fredoka One'; background:rgba(255,255,255,0.9); padding:2px 4px; border-radius:4px; letter-spacing:0.5px; box-shadow: 1px 1px 0 rgba(0,0,0,0.3);}
 
-        .char-wrapper { position: absolute; width: 55px; height: 55px; z-index: 10; transition: transform 0.3s ease-in-out; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; }
-        .char-sprite { width: 40px; height: 40px; object-fit: contain; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
-        .char-name-tag { position: absolute; bottom: -8px; background: rgba(0,0,0,0.8); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.6rem; font-weight: bold; white-space: nowrap; }
+        .char-wrapper { position: absolute; width: 55px; height: 55px; z-index: 10; transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1); display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: none; }
+        .char-sprite { width: 45px; height: 45px; object-fit: contain; transition: transform 0.2s; filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.5));}
+        .char-name-tag { position: absolute; bottom: -10px; background: rgba(0,0,0,0.9); color: white; padding: 2px 6px; border-radius: 6px; font-size: 0.65rem; font-weight: bold; white-space: nowrap; border: 1px solid white;}
         
         @keyframes shakeError {
             0% { transform: translateX(0); filter: drop-shadow(0 0 10px red); }
@@ -70,122 +76,142 @@
         }
         .shake-error { animation: shakeError 0.4s ease-in-out; }
 
-        .walkie-talkie { background: #e0f7fa; border: 4px solid #006064; border-radius: 10px; padding: 10px; width: 100%; box-sizing: border-box; color: black; margin-bottom: 10px;}
-        .walkie-title { font-family: 'Fredoka One'; color: #006064; margin: 0 0 5px 0; font-size: 1rem; display: flex; justify-content: space-between; align-items: center;}
+        .walkie-talkie { background: #e0f7fa; border: 4px solid #006064; border-radius: 15px; padding: 15px; width: 100%; box-sizing: border-box; color: black; margin-bottom: 10px; box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 4px 4px 0 rgba(0,0,0,0.2);}
+        .walkie-title { font-family: 'Fredoka One'; color: #006064; margin: 0 0 8px 0; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center;}
         
-        .chat-history { background: white; border: 2px solid #006064; padding: 10px; border-radius: 5px; height: 80px; overflow-y: auto; margin-bottom: 10px; font-size: 0.9rem; font-weight: bold; line-height: 1.4; display: flex; flex-direction: column; gap: 5px;}
+        .chat-history { background: white; border: 3px solid #006064; padding: 10px; border-radius: 10px; height: 90px; overflow-y: auto; margin-bottom: 10px; font-size: 0.95rem; font-weight: bold; line-height: 1.5; display: flex; flex-direction: column; gap: 6px;}
         
-        .walkie-inputs { display: flex; gap: 5px; }
-        .walkie-inputs select { padding: 5px; font-size: 0.9rem; flex: 1; margin: 0;}
+        .walkie-inputs { display: flex; gap: 8px; }
+        .walkie-inputs select { padding: 8px; font-size: 0.95rem; flex: 1; margin: 0;}
 
-        @keyframes pulseAlert { 0% { opacity: 0.5; color: red; } 50% { opacity: 1; color: #ff007f; } 100% { opacity: 0.5; color: red; } }
-        .alert-text { animation: pulseAlert 1.5s infinite; font-size: 0.85rem; }
+        @keyframes pulseAlert { 0% { opacity: 0.5; color: red; transform: scale(0.95);} 50% { opacity: 1; color: #ff007f; transform: scale(1.05);} 100% { opacity: 0.5; color: red; transform: scale(0.95);} }
+        .alert-text { animation: pulseAlert 1.2s infinite; font-size: 0.9rem; font-weight: 900;}
 
-        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
-        .controls button { padding: 10px; font-size: 1rem; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; margin-top: 5px;}
+        .controls button { padding: 12px; font-size: 1.1rem; border-radius: 15px;}
         
-        #role-display { color: yellow; margin: 5px 0; text-align: center; }
-        .result-box { background: rgba(255,255,255,0.1); border: 4px dashed white; border-radius: 20px; padding: 20px; text-align: center; width: 100%; max-width: 400px; margin-top: 20px;}
+        #role-display { color: yellow; margin: 5px 0 10px 0; text-align: center; text-shadow: 1px 1px black; font-size: 1.3rem;}
+        .result-box { background: rgba(255,255,255,0.15); border: 4px dashed white; border-radius: 20px; padding: 25px; text-align: center; width: 100%; max-width: 400px; margin-top: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);}
         
-        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center;}
-        .modal-box { background: white; color: black; border: 5px solid #ff007f; border-radius: 20px; padding: 20px; width: 85%; max-width: 600px; font-family: 'Fredoka One'; max-height: 80vh; overflow-y: auto;}
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center; padding: 15px; box-sizing: border-box;}
+        .modal-box { background: white; color: black; border: 6px solid #ff007f; border-radius: 25px; padding: 25px; width: 100%; max-width: 600px; font-family: 'Fredoka One'; max-height: 85vh; overflow-y: auto; box-shadow: 0 15px 40px rgba(0,0,0,0.5);}
         
-        #tollgate-password-display { font-size: 1.2rem; color: #ff007f; background: yellow; padding: 10px; border: 3px dashed black; margin: 5px 0; display: none; text-align: center;}
+        #tollgate-password-display { font-size: 1.3rem; color: #ff007f; background: yellow; padding: 12px; border: 4px dashed black; border-radius: 15px; margin: 5px 0 15px 0; display: none; text-align: center; box-shadow: 3px 3px 0 black;}
         
-        /* 호스트 관전 대시보드 전용 스타일 */
-        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; width: 100%; max-width: 1000px; }
-        .dash-card { background: white; color: black; border: 4px solid #00f0ff; border-radius: 15px; padding: 15px; text-align: center; }
-        .dash-title { font-family: 'Fredoka One'; font-size: 1.5rem; color: #ff007f; margin-bottom: 5px; }
-        .dash-info { font-size: 1.2rem; font-weight: bold; margin: 5px 0; }
-        .dash-log { background: #eee; font-size: 0.8rem; padding: 5px; border-radius: 5px; height: 40px; overflow-y: auto; text-align: left;}
+        /* 호스트 관전 대시보드 전용 스타일 (세련되게) */
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; margin-top: 15px;}
+        .dash-card { background: white; color: black; border: 5px solid; border-radius: 20px; padding: 15px; text-align: center; box-shadow: 5px 5px 0 rgba(0,0,0,0.3); display: flex; flex-direction: column; justify-content: space-between;}
+        .dash-title { font-family: 'Fredoka One'; font-size: 1.8rem; margin-bottom: 5px; text-shadow: 1px 1px #eee;}
+        .dash-info { font-size: 1.4rem; font-weight: 900; margin: 5px 0; }
+        .dash-log { background: #f8f9fa; font-family: 'Nunito', sans-serif; font-size: 0.9rem; padding: 8px; border-radius: 10px; height: 80px; overflow-y: auto; text-align: left; border: 2px inset #ddd; line-height: 1.4; display: flex; flex-direction: column; gap: 4px;}
+        .howto-section { text-align: left; margin-bottom: 20px; padding: 15px; border-left: 6px solid #00f0ff; background: #f8f9fa; border-radius: 0 15px 15px 0; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);}
     </style>
 </head>
 <body>
 
-    <h1>Map Reader</h1>
+    <h1>🗺️ Map Reader</h1>
 
+    <!-- 1. Intro Screen -->
     <div id="intro-screen" class="screen active">
-        <h2 style="color:var(--btn-forward)">Enter Your Nickname</h2>
-        <input type="text" id="nickname-input" placeholder="Your Name" maxlength="10">
-        <h3 style="color:var(--btn-right)">Select Your Character</h3>
-        <div class="char-selection-container">
-            <div class="char-option selected" onclick="selectChar('char1.png', this)"><img src="char1.png" alt="" onerror="this.style.display='none'"></div>
-            <div class="char-option" onclick="selectChar('char2.png', this)"><img src="char2.png" alt="" onerror="this.style.display='none'"></div>
-            <div class="char-option" onclick="selectChar('char3.png', this)"><img src="char3.png" alt="" onerror="this.style.display='none'"></div>
-            <div class="char-option" onclick="selectChar('char4.png', this)"><img src="char4.png" alt="" onerror="this.style.display='none'"></div>
-            <div class="char-option" onclick="selectChar('char5.png', this)"><img src="char5.png" alt="" onerror="this.style.display='none'"></div>
-        </div>
-        <div style="display: flex; gap: 15px; margin-top: 10px;">
-            <button type="button" class="btn-yellow" onclick="document.getElementById('howto-modal').style.display='flex'">❓ How to Play</button>
-            <button type="button" class="btn-pink" onclick="login()">ENTER GAME</button>
+        <div class="glass-panel">
+            <h2 style="color:var(--btn-forward); margin-top: 0;">Enter Your Nickname</h2>
+            <input type="text" id="nickname-input" placeholder="Your Name" maxlength="10">
+            
+            <h3 style="color:var(--btn-right); margin-top: 20px;">Select Your Agent</h3>
+            <div class="char-selection-container">
+                <div class="char-option selected" onclick="selectChar('char1.png', this)"><img src="char1.png" alt="C1" onerror="this.style.display='none'"></div>
+                <div class="char-option" onclick="selectChar('char2.png', this)"><img src="char2.png" alt="C2" onerror="this.style.display='none'"></div>
+                <div class="char-option" onclick="selectChar('char3.png', this)"><img src="char3.png" alt="C3" onerror="this.style.display='none'"></div>
+                <div class="char-option" onclick="selectChar('char4.png', this)"><img src="char4.png" alt="C4" onerror="this.style.display='none'"></div>
+                <div class="char-option" onclick="selectChar('char5.png', this)"><img src="char5.png" alt="C5" onerror="this.style.display='none'"></div>
+            </div>
+
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 15px;">
+                <button type="button" class="btn-yellow" onclick="document.getElementById('howto-modal').style.display='flex'">❓ How to Play</button>
+                <button type="button" class="btn-pink" onclick="login()">ENTER GAME 🚀</button>
+            </div>
         </div>
     </div>
 
+    <!-- 2. Lobby Screen -->
     <div id="lobby-screen" class="screen">
-        <h2>Welcome, <span id="display-name" style="color: yellow;"></span>!</h2>
-        <div style="display: flex; gap: 20px; margin-top: 30px; align-items: center; flex-wrap: wrap; justify-content: center;">
-            <div style="display: flex; flex-direction: column; gap: 10px; align-items: center; border: 3px dashed #ffeb3b; padding: 15px; border-radius: 15px;">
-                <span style="font-family:'Fredoka One'; color:#ffeb3b;">Create New Game</span>
-                <select id="team-count-select" style="width: 100%;">
-                    <option value="2">2 Teams (4 Players)</option>
-                    <option value="3">3 Teams (6 Players)</option>
-                    <option value="4">4 Teams (8 Players)</option>
-                    <option value="6">6 Teams (12 Players)</option>
-                    <option value="8">8 Teams (16 Players)</option>
-                    <option value="12">12 Teams (24 Players)</option>
-                </select>
-                <button type="button" class="btn-cyan" onclick="createRoom()">CREATE ROOM</button>
-            </div>
-            <h3 style="margin: 0 10px;">OR</h3>
-            <div style="display: flex; flex-direction: column; gap: 10px; align-items: center; border: 3px dashed #00f0ff; padding: 15px; border-radius: 15px;">
-                <span style="font-family:'Fredoka One'; color:#00f0ff;">Join Existing Game</span>
-                <input type="text" id="room-code-input" placeholder="Enter 4 Digits" maxlength="4">
-                <button type="button" class="btn-yellow" onclick="joinRoom()">JOIN ROOM</button>
+        <div class="glass-panel" style="width: 100%; max-width: 600px;">
+            <h2 style="margin-top: 0;">Welcome, <span id="display-name" style="color: yellow; text-decoration: underline;"></span>!</h2>
+            <div style="display: flex; gap: 20px; margin-top: 30px; align-items: stretch; flex-wrap: wrap; justify-content: center;">
+                
+                <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 15px; align-items: center; border: 4px dashed #ffeb3b; padding: 20px; border-radius: 20px; background: rgba(0,0,0,0.5);">
+                    <span style="font-family:'Fredoka One'; color:#ffeb3b; font-size: 1.3rem;">👑 Create Room</span>
+                    <select id="team-count-select" style="width: 100%;">
+                        <option value="1">1 Team (2 Players)</option>
+                        <option value="2" selected>2 Teams (4 Players)</option>
+                        <option value="3">3 Teams (6 Players)</option>
+                        <option value="4">4 Teams (8 Players)</option>
+                        <option value="6">6 Teams (12 Players)</option>
+                        <option value="8">8 Teams (16 Players)</option>
+                        <option value="12">12 Teams (24 Players)</option>
+                    </select>
+                    <button type="button" class="btn-cyan" style="width: 100%;" onclick="createRoom()">CREATE</button>
+                </div>
+                
+                <div style="flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 15px; align-items: center; border: 4px dashed #00f0ff; padding: 20px; border-radius: 20px; background: rgba(0,0,0,0.5);">
+                    <span style="font-family:'Fredoka One'; color:#00f0ff; font-size: 1.3rem;">🚪 Join Room</span>
+                    <input type="text" id="room-code-input" placeholder="4 Digits Code" maxlength="4" style="width: 80%;">
+                    <button type="button" class="btn-yellow" style="width: 100%;" onclick="joinRoom()">JOIN</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- 3. Waiting Room Screen -->
     <div id="room-screen" class="screen">
-        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
-            <button type="button" class="btn-red" style="padding: 8px 15px; font-size: 1rem;" onclick="leaveRoom()">◀ Leave</button>
-            <h2>Room: <span id="room-code-display" style="color:#39ff14; font-size: 2.5rem;"></span></h2>
-            <div style="width:80px;"></div>
+        <div style="width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <button type="button" class="btn-red" style="padding: 10px 15px; font-size: 1rem;" onclick="leaveRoom()">◀ Leave</button>
+            <h2 style="margin: 0;">Code: <span id="room-code-display" style="color:#39ff14; font-size: 2.8rem; text-shadow: 2px 2px black;"></span></h2>
+            <div style="width:85px;"></div>
         </div>
-        <p style="text-align: center;">Drag your character card to your Team!<br><span style="font-size:0.9rem; color:yellow;">Host can stay in 'Waiting Area' to be a Spectator!</span></p>
+        <div class="glass-panel" style="width: 100%; padding: 10px 20px;">
+            <p style="margin: 5px 0; font-size: 1.1rem; font-weight: bold;">👇 Drag your character card to your Team!</p>
+            <p style="margin: 0; font-size:0.95rem; color:#ffeb3b;">Host can stay in 'Waiting Area' to be a Dashboard Spectator!</p>
+        </div>
         
         <div class="team-container" id="dynamic-team-container">
-            </div>
-        <div style="width: 100%; display:flex; justify-content: center; margin-top: 10px;">
-            <div class="team-box" id="team-none" style="width: 100%; max-width: 400px; border-color: gray;" ondragover="allowDrop(event)" ondrop="drop(event, 'none')">
-                <div class="team-title" style="color: white;">Waiting Area (Spectators)</div>
+            <!-- Dynamic Teams -->
+        </div>
+        
+        <div style="width: 100%; display:flex; justify-content: center; margin-top: 15px;">
+            <div class="team-box" id="team-none" style="width: 100%; max-width: 500px; border-color: gray; background: rgba(255,255,255,0.1);" ondragover="allowDrop(event)" ondrop="drop(event, 'none')">
+                <div class="team-title" style="color: white;">👀 Waiting Area (Spectators)</div>
             </div>
         </div>
 
-        <div style="margin-top: 20px; display: flex; gap: 20px;">
-            <button type="button" class="btn-cyan" id="ready-btn" onclick="toggleReady()">READY</button>
-            <button type="button" class="btn-pink" id="start-game-btn" onclick="startGame()" style="display: none; background-color: gray;" disabled>Waiting...</button>
+        <div style="margin-top: 25px; display: flex; gap: 20px;">
+            <button type="button" class="btn-cyan" id="ready-btn" style="padding: 15px 40px; font-size: 1.5rem;" onclick="toggleReady()">READY ✅</button>
+            <button type="button" class="btn-pink" id="start-game-btn" onclick="startGame()" style="display: none; padding: 15px 40px; font-size: 1.5rem;" disabled>Waiting...</button>
         </div>
     </div>
 
+    <!-- 4. Host Dashboard Screen -->
     <div id="dashboard-screen" class="screen">
-        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center;">
-            <h2 style="color: #00f0ff;">🎮 Live Dashboard</h2>
-            <span class="timer" id="dash-timer">00:00</span>
+        <div style="display: flex; justify-content: space-between; width: 100%; align-items: center; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 15px; border: 2px solid #00f0ff;">
+            <h2 style="color: #00f0ff; margin: 0; font-family: 'Fredoka One';">🎮 Live Dashboard</h2>
+            <span class="timer" id="dash-timer" style="margin: 0;">00:00</span>
         </div>
-        <h3 id="dash-round-info" style="color: yellow; margin-top: 0;">Round 1</h3>
+        <h3 id="dash-round-info" style="color: yellow; margin: 10px 0; font-size: 1.5rem;">Round 1</h3>
         
         <div class="dashboard-grid" id="dash-grid">
-            </div>
+            <!-- Dynamic Dashboard Cards -->
+        </div>
         
-        <button type="button" class="btn-pink" id="dash-next-btn" style="margin-top: 20px; display: none;" onclick="startRound(currentRound + 1)">START NEXT ROUND</button>
+        <button type="button" class="btn-pink" id="dash-next-btn" style="margin-top: 30px; display: none; padding: 15px 40px; font-size: 1.5rem; box-shadow: 0 0 20px #ff007f;" onclick="hostNextRound()">START NEXT ROUND 🚀</button>
     </div>
 
+    <!-- 5. Game Screen -->
     <div id="game-screen" class="screen">
         <div class="game-header">
             <span id="round-info">Round 1/4</span>
             <span class="timer" id="timer-display">00:00</span>
         </div>
-        <h3 id="role-display" style="margin: 0 0 5px 0;"></h3>
+        <h3 id="role-display"></h3>
         
         <div class="board-section" id="my-board-section">
             <div id="target-banner">Situation: <span id="target-name">Wait...</span></div>
@@ -194,8 +220,8 @@
             <div class="walkie-talkie" id="walkie-talkie">
                 <div class="walkie-title">
                     <span>📻 Walkie-Talkie</span>
-                    <span id="action-prompt" class="alert-text">👉 Ask the Guide!</span>
-                    <span id="moves-badge" style="background:#ff007f; color:white; padding:2px 8px; border-radius:10px; font-size:0.8rem; display:none;">Moves: 0</span>
+                    <span id="action-prompt" class="alert-text">👉 Ask the Guide first!</span>
+                    <span id="moves-badge" style="background:#ff007f; color:white; padding:4px 10px; border-radius:12px; font-size:0.85rem; display:none; box-shadow: 1px 1px 0 black;">Moves: 0</span>
                 </div>
                 
                 <div class="chat-history" id="chat-display"></div>
@@ -211,36 +237,36 @@
                         <option value="the School?">the School?</option>
                         <option value="the Park?">the Park?</option>
                     </select>
-                    <button type="button" class="btn-cyan" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieQuestion()">SEND</button>
+                    <button type="button" class="btn-cyan" style="padding: 8px 15px; font-size:1rem;" onclick="sendWalkieQuestion()">SEND</button>
                 </div>
 
                 <div id="guide-chat-form" style="display: none;" class="walkie-inputs">
                     <select id="chat-a-1">
-                        <option value="Go straight">Go straight</option>
+                        <option value="Go straight for">Go straight for</option>
                         <option value="Turn left and go">Turn left and go</option>
                         <option value="Turn right and go">Turn right and go</option>
                     </select>
                     <select id="chat-a-2">
-                        <option value="1">1 block.</option>
-                        <option value="2">2 blocks.</option>
-                        <option value="3">3 blocks.</option>
+                        <option value="1 block.">1 block.</option>
+                        <option value="2 blocks.">2 blocks.</option>
+                        <option value="3 blocks.">3 blocks.</option>
                     </select>
-                    <button type="button" class="btn-yellow" id="guide-send-btn" style="padding: 5px; font-size:0.9rem;" onclick="sendWalkieAnswer()">SEND</button>
+                    <button type="button" class="btn-yellow" id="guide-send-btn" style="padding: 8px 15px; font-size:1rem;" onclick="sendWalkieAnswer()">SEND</button>
                 </div>
 
                 <div id="guide-arrival-form" style="display: none; margin-top: 5px;" class="walkie-inputs">
                     <select id="chat-arrival">
                         <option value="It's on your left.">It's on your left.</option>
                         <option value="It's on your right.">It's on your right.</option>
-                        <option value="You arrived at the destination!">You arrived!</option>
+                        <option value="You arrived at the destination!">You arrived at the destination!</option>
                     </select>
-                    <button type="button" class="btn-pink" style="padding: 5px; font-size:0.9rem;" onclick="sendArrivalSignal()">📢 Signal Arrival</button>
+                    <button type="button" class="btn-pink" style="padding: 8px 15px; font-size:1rem; width:100%;" onclick="sendArrivalSignal()">📢 Signal Arrival (도착 승인)</button>
                 </div>
             </div>
             
             <div class="grid-board" id="grid">
                 <svg id="path-svg" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:4;">
-                    <polyline id="path-line" fill="none" stroke="#ffeb3b" stroke-width="5" stroke-dasharray="8 4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline id="path-line" fill="none" stroke="#ffeb3b" stroke-width="6" stroke-dasharray="8 6" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(2px 2px 1px rgba(0,0,0,0.5));"/>
                 </svg>
                 <div class="char-wrapper" id="player-wrapper" style="display:none; z-index: 10;">
                     <img id="player-sprite" class="char-sprite" src="char1.png" alt="player">
@@ -255,68 +281,77 @@
                     <button type="button" id="btn-left" style="background: var(--btn-left)" onclick="moveChar('left')">↩️ Turn Left</button>
                     <button type="button" id="btn-right" style="background: var(--btn-right)" onclick="moveChar('right')">↪️ Turn Right</button>
                 </div>
-                <button type="button" class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 10px; display: none;" onclick="sendMoveComplete()">✅ Move Complete (Ask for next)</button>
-                <button type="button" class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 10px; display: none;">🚩 LOCATION CHECK (Finish)</button>
+                
+                <button type="button" class="btn-cyan" id="btn-move-complete" style="width: 100%; margin-top: 15px; display: none; padding: 15px;" onclick="sendMoveComplete()">✅ Move Complete (Ask for next direction)</button>
+                <button type="button" class="btn-pink" id="check-btn" onclick="checkWin()" style="width: 100%; margin-top: 15px; display: none; padding: 15px; font-size: 1.3rem;">🚩 LOCATION CHECK (Finish Round)</button>
             </div>
         </div>
     </div>
 
+    <!-- Tollgate Modal -->
     <div id="tollgate-modal" class="modal">
         <div class="modal-box">
-            <h2>👮 Police Checkpoint</h2>
-            <p id="tollgate-desc" style="margin-top:0;">Talk to your guide to find the password!</p>
+            <h2 style="font-size: 2rem; margin-top: 0;">👮 Police Checkpoint</h2>
+            <p id="tollgate-desc" style="font-size: 1.1rem; color: #555;">Talk to your guide to find the password!</p>
             
-            <div id="tollgate-type-blank" style="display:none;">
-                <p id="tollgate-hint-text" style="font-size: 1.5rem; letter-spacing: 5px; color: #ff007f; background: #eee; padding: 10px; border-radius: 10px;"></p>
-                <input type="text" id="tollgate-input" placeholder="Type full password here" style="width: 100%; box-sizing: border-box;" autocomplete="off">
+            <div id="tollgate-type-blank" style="display:none; margin: 20px 0;">
+                <p id="tollgate-hint-text" style="font-size: 1.6rem; letter-spacing: 5px; color: #ff007f; background: #eee; padding: 15px; border-radius: 15px; border: 3px dashed #ff007f; font-weight: 900;"></p>
+                <input type="text" id="tollgate-input" placeholder="Type full sentence here" style="width: 100%; box-sizing: border-box; font-size: 1.3rem;" autocomplete="off">
             </div>
 
-            <div id="tollgate-type-combo" style="display:none;">
-                <p style="font-size: 1rem; color: #006064;">Click the buttons in the exact order!</p>
-                <div id="combo-display" style="font-size: 2rem; background: #eee; min-height: 40px; padding: 5px; border-radius: 10px; margin-bottom: 10px; border: 2px dashed gray;"></div>
-                <div style="display: flex; gap: 5px; justify-content: center;">
-                    <button type="button" class="btn-cyan" onclick="addCombo('forward')">⬆️</button>
-                    <button type="button" class="btn-pink" onclick="addCombo('backward')">⬇️</button>
-                    <button type="button" class="btn-yellow" onclick="addCombo('left')">↩️</button>
-                    <button type="button" class="btn-yellow" onclick="addCombo('right')">↪️</button>
+            <div id="tollgate-type-combo" style="display:none; margin: 20px 0;">
+                <p style="font-size: 1.1rem; color: #006064; font-weight: bold;">Click the buttons in the exact order!</p>
+                <div id="combo-display" style="font-size: 2.5rem; background: #eee; min-height: 60px; padding: 10px; border-radius: 15px; margin-bottom: 15px; border: 3px dashed #006064; display: flex; align-items: center; justify-content: center; overflow-x: auto;"></div>
+                <div style="display: flex; gap: 8px; justify-content: center;">
+                    <button type="button" class="btn-cyan" style="padding: 15px 25px; font-size: 1.5rem;" onclick="addCombo('forward')">⬆️</button>
+                    <button type="button" class="btn-pink" style="padding: 15px 25px; font-size: 1.5rem;" onclick="addCombo('backward')">⬇️</button>
+                    <button type="button" class="btn-yellow" style="padding: 15px 25px; font-size: 1.5rem;" onclick="addCombo('left')">↩️</button>
+                    <button type="button" class="btn-yellow" style="padding: 15px 25px; font-size: 1.5rem;" onclick="addCombo('right')">↪️</button>
                 </div>
             </div>
 
-            <button type="button" class="btn-green" onclick="submitTollgate()" style="width: 100%; margin-top: 15px; font-size: 1.2rem;">Unlock Road</button>
+            <button type="button" class="btn-green" onclick="submitTollgate()" style="width: 100%; margin-top: 15px; font-size: 1.4rem; padding: 15px;">Unlock Road 🔓</button>
         </div>
     </div>
 
+    <!-- Lounge Screen -->
     <div id="lounge-screen" class="screen">
-        <h2 id="lounge-title" style="color: #39ff14; font-size: 3rem;">Round Cleared!</h2>
-        <div class="result-box">
-            <h3 style="color: white; font-size: 1.5rem; margin-top: 0;">Our Team's Record</h3>
-            <p id="lounge-my-time" style="color: yellow; font-size: 3rem; margin: 10px 0;">00:00</p>
+        <h2 id="lounge-title" style="color: #39ff14; font-size: 3.5rem; text-shadow: 3px 3px black; text-align: center;">Round Cleared!</h2>
+        <div class="result-box" style="background: rgba(0,0,0,0.6);">
+            <h3 style="color: white; font-size: 1.8rem; margin-top: 0;">Our Team's Record</h3>
+            <p id="lounge-my-time" style="color: yellow; font-size: 3.5rem; margin: 10px 0; text-shadow: 2px 2px black;">00:00</p>
         </div>
-        <p id="lounge-status" style="font-size: 1.2rem; margin-top: 30px;">Waiting for other teams...</p>
+        <div class="glass-panel" style="margin-top: 30px;">
+            <p id="lounge-status" style="font-size: 1.5rem; margin: 0; font-weight: bold; color: #00f0ff;">Waiting for the Host to start next round...</p>
+        </div>
     </div>
 
+    <!-- Ending Screen -->
     <div id="ending-screen" class="screen">
-        <h2 style="color: #ff007f; font-size: 4rem; margin-bottom: 0;">SUCCESS!</h2>
-        <div id="ending-results" class="result-box" style="max-height: 50vh; overflow-y: auto;"></div>
+        <h2 style="color: #ff007f; font-size: 4.5rem; margin-bottom: 0; text-shadow: 4px 4px black; text-align: center;">SUCCESS! 🎉</h2>
+        <div id="ending-results" class="result-box" style="max-height: 50vh; overflow-y: auto; background: rgba(0,0,0,0.8); border: 5px solid yellow;"></div>
         <button type="button" class="btn-yellow" onclick="location.reload()" style="margin-top: 30px; padding: 15px 40px; font-size: 1.5rem;">PLAY AGAIN</button>
     </div>
 
+    <!-- How to Play Modal -->
     <div id="howto-modal" class="modal">
         <div class="modal-box">
-            <h2 style="color: #00f0ff; margin-top: 0; text-shadow: 2px 2px black;">❓ HOW TO PLAY</h2>
+            <h2 style="color: #00f0ff; margin-top: 0; text-shadow: 2px 2px black; font-size: 2rem;">❓ HOW TO PLAY</h2>
             <div class="howto-section">
-                <h3 style="margin: 0; color: #ff007f;">1. Explorer (탐험가)</h3>
-                <p style="font-size: 0.95rem; margin: 5px 0;">주어진 'Situation(상황)'을 보고 목적지를 파악하세요! 무전기로 가이드에게 <b>먼저 길을 물어봐야 합니다.</b> 이동이 끝나면 <b>[Move Complete]</b>를 눌러 다음 길을 요구하고, 도착 신호를 받으면 <b>[LOCATION CHECK]</b>를 누르세요.</p>
+                <h3 style="margin: 0; color: #ff007f; font-size: 1.2rem;">1. Explorer (탐험가)</h3>
+                <p style="font-size: 1rem; margin: 8px 0; line-height: 1.4;">주어진 'Situation(상황)'을 보고 목적지를 파악하세요! 무전기로 가이드에게 <b>먼저 길을 물어봐야 합니다.</b> 이동이 끝나면 <b>[Move Complete]</b>를 눌러 다음 길을 요구하고, 도착 신호를 받으면 <b>[LOCATION CHECK]</b>를 누르세요.</p>
+                <p style="font-size: 0.9rem; margin: 5px 0; color:#666; font-style:italic;">Deduce your destination from the given 'Situation'. You must <b>ask the Guide for directions first</b> via Walkie-Talkie. When your movement ends, click <b>[Move Complete]</b> to ask for more. Once you receive the arrival signal, press <b>[LOCATION CHECK]</b>.</p>
             </div>
             <div class="howto-section">
-                <h3 style="margin: 0; color: #006064;">2. Guide (가이드)</h3>
-                <p style="font-size: 0.95rem; margin: 5px 0;">지도가 보이지만 <b>정답 목적지를 모릅니다.</b> 탐험가의 질문을 듣고 길을 안내하세요. 목적지에 도착한 것이 보이면 <b>[📢 Signal Arrival]</b> 버튼으로 도착 신호를 줘야 합니다.</p>
+                <h3 style="margin: 0; color: #006064; font-size: 1.2rem;">2. Guide (가이드)</h3>
+                <p style="font-size: 1rem; margin: 8px 0; line-height: 1.4;">지도가 보이지만 <b>정답 목적지를 모릅니다.</b> 탐험가의 질문을 듣고 길을 안내하세요. 목적지에 도착한 것이 보이면 <b>[📢 Signal Arrival]</b> 버튼으로 도착 신호를 줘야 합니다.</p>
+                <p style="font-size: 0.9rem; margin: 5px 0; color:#666; font-style:italic;">You can see the map but <b>do not know the target destination.</b> Give directions based on the Explorer's questions. When you see the Explorer reach the target, click <b>[📢 Signal Arrival]</b> to give them permission to finish.</p>
             </div>
             <div class="howto-section">
-                <h3 style="margin: 0; color: red;">👮 Checkpoint Missions</h3>
-                <p style="font-size: 0.95rem; margin: 5px 0;">맵 중앙 검문소에서는 <b>가이드 화면에만 암호가 뜹니다.</b> <br>홀수 라운드는 <b>빈칸 추론(타이핑)</b>, 짝수 라운드는 <b>방향키 콤보 입력</b>입니다. 무전기로 암호를 소통하세요!</p>
+                <h3 style="margin: 0; color: red; font-size: 1.2rem;">👮 Checkpoint Missions</h3>
+                <p style="font-size: 1rem; margin: 8px 0; line-height: 1.4;">맵 중앙 검문소에서는 <b>가이드 화면에만 암호가 뜹니다.</b> <br>홀수 라운드는 <b>빈칸 추론(타이핑)</b>, 짝수 라운드는 <b>방향키 콤보 입력</b>입니다. 무전기로 암호를 소통하세요!</p>
             </div>
-            <button type="button" class="btn-pink" style="width: 100%; margin-top: 10px;" onclick="document.getElementById('howto-modal').style.display='none'">I UNDERSTAND!</button>
+            <button type="button" class="btn-pink" style="width: 100%; margin-top: 10px; padding: 15px; font-size: 1.2rem;" onclick="document.getElementById('howto-modal').style.display='none'">I UNDERSTAND!</button>
         </div>
     </div>
 
@@ -336,29 +371,32 @@
 
         let myId = "user_" + Math.floor(Math.random() * 10000);
         let myName = ""; let myChar = "char1.png"; let currentRoom = "";
-        let isHost = false; let myTeam = "none"; let myRole = "";
+        let isHost = false; let myTeam = "none"; let myRole = ""; let myTeamColor = "white";
         let timerInterval = null; let roundStartTime = 0; let currentRound = 1;
         let localTeamData = null;
         
         let hostTeamCount = 2; 
         const teamNames = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+        const teamColors = ['#ff007f', '#00f0ff', '#39ff14', '#ffeb3b', '#ff8c00', '#9d00ff', '#ff1493', '#00ff7f', '#ffff00', '#00fa9a', '#ff4500', '#1e90ff'];
         let myComboInput = [];
 
-        // 완벽 십자 도로망
-        const mapData = [
-            [2, 0, 0, 0, 4], 
+        // 다이내믹 맵 글로벌 변수
+        let globalTargets = [];
+        let globalMapData = [];
+        const baseMapData = [
+            [0, 0, 0, 0, 0], 
             [1, 1, 0, 1, 1], 
-            [5, 0, 7, 0, 6], 
+            [0, 0, 7, 0, 0], 
             [1, 1, 0, 1, 1], 
             [1, 1, 0, 0, 0]  
         ];
-        
-        // 다이내믹 검문소 미션 데이터 추가
-        const targets = [
-            { id: 2, name: "HOSPITAL", emoji: "🏥", x: 0, y: 0, situation: "I have a cold. 🤧 (감기에 걸렸어요.)", pwdType: "blank", pwdGuide: "Go straight", pwdExplorer: "G_ str__ght", pwdAns: "go straight" },
-            { id: 4, name: "SCHOOL", emoji: "🏫", x: 4, y: 0, situation: "I have an English class! 🎒 (영어 수업이 있어요!)", pwdType: "combo", pwdGuide: "Forward, Left, Forward", pwdAns: "forward,left,forward" },
-            { id: 5, name: "BANK", emoji: "🏦", x: 0, y: 2, situation: "I need to save money. 💰 (저금을 해야 해요.)", pwdType: "blank", pwdGuide: "Turn left", pwdExplorer: "T_rn l_ft", pwdAns: "turn left" },
-            { id: 6, name: "PARK", emoji: "🌲", x: 4, y: 2, situation: "I want to ride a bike. 🚲 (자전거를 타고 싶어요.)", pwdType: "combo", pwdGuide: "Right, Forward, Forward", pwdAns: "right,forward,forward" }
+
+        // 기본 건물 스펙
+        const buildingSpecs = [
+            { id: 2, name: "HOSPITAL", emoji: "🏥", pwdType: "blank", pwdGuide: "Go straight for two blocks.", pwdExplorer: "G_ str__ght f_r tw_ bl_ck_s.", pwdAns: "go straight for two blocks.", situation: "I have a cold. 🤧 (감기에 걸렸어요.)" },
+            { id: 4, name: "SCHOOL", emoji: "🏫", pwdType: "combo", pwdGuide: "Forward, Left, Forward", pwdAns: "forward,left,forward", situation: "I have an English class! 🎒 (영어 수업이 있어요!)" },
+            { id: 5, name: "BANK", emoji: "🏦", pwdType: "blank", pwdGuide: "Turn left and go one block.", pwdExplorer: "T_rn l_ft _nd g_ _ne bl_ck.", pwdAns: "turn left and go one block.", situation: "I need to save money. 💰 (저금을 해야 해요.)" },
+            { id: 6, name: "PARK", emoji: "🌲", pwdType: "combo", pwdGuide: "Right, Forward, Forward", pwdAns: "right,forward,forward", situation: "I want to ride a bike. 🚲 (자전거를 타고 싶어요.)" }
         ];
 
         function selectChar(imgName, element) {
@@ -374,11 +412,22 @@
             switchScreen('lobby-screen');
         }
 
+        // ★ [핵심] 방 생성 시 타겟(건물) 위치 4곳 모서리에 랜덤 셔플 할당
         function createRoom() {
             const countSelect = document.getElementById('team-count-select');
             hostTeamCount = parseInt(countSelect.value);
             currentRoom = Math.floor(1000 + Math.random() * 9000).toString(); isHost = true;
-            db.ref('rooms/' + currentRoom).set({ status: 'waiting', round: 1, teamCount: hostTeamCount }).then(() => {
+            
+            // 랜덤 좌표 셔플
+            let coords = [ {x:0, y:0}, {x:4, y:0}, {x:0, y:2}, {x:4, y:2} ];
+            coords.sort(() => Math.random() - 0.5);
+            let randomTargets = JSON.parse(JSON.stringify(buildingSpecs)); // Deep copy
+            for(let i=0; i<4; i++){
+                randomTargets[i].x = coords[i].x;
+                randomTargets[i].y = coords[i].y;
+            }
+
+            db.ref('rooms/' + currentRoom).set({ status: 'waiting', round: 1, teamCount: hostTeamCount, targetConfig: randomTargets }).then(() => {
                 joinDbRoom(); switchScreen('room-screen');
                 document.getElementById('room-code-display').innerText = currentRoom;
             });
@@ -388,8 +437,10 @@
             const code = document.getElementById('room-code-input').value.trim();
             if(code.length !== 4) return alert("Enter 4 digits!");
             currentRoom = code; 
-            db.ref(`rooms/${currentRoom}/teamCount`).once('value').then(snap => {
-                if(snap.val()) hostTeamCount = snap.val();
+            db.ref(`rooms/${currentRoom}`).once('value').then(snap => {
+                if(!snap.exists()) { alert("Room not found!"); currentRoom = ""; return; }
+                let d = snap.val();
+                if(d.teamCount) hostTeamCount = d.teamCount;
                 joinDbRoom(); switchScreen('room-screen');
                 document.getElementById('room-code-display').innerText = currentRoom;
             });
@@ -399,27 +450,35 @@
             if (!currentRoom) return;
             db.ref(`rooms/${currentRoom}/players/${myId}`).remove().then(() => {
                 db.ref(`rooms/${currentRoom}`).off(); 
-                currentRoom = ""; myTeam = "none"; myRole = ""; localTeamData = null;
+                currentRoom = ""; myTeam = "none"; myRole = ""; localTeamData = null; myTeamColor = "white";
                 switchScreen('lobby-screen');
             });
         }
 
         function joinDbRoom() {
+            // ★ [버그 픽스] 중복 입장(리스너 다중 부착) 방지를 위해 기존 리스너 해제 후 재부착
+            db.ref(`rooms/${currentRoom}`).off();
             const playerRef = db.ref(`rooms/${currentRoom}/players/${myId}`);
             playerRef.set({ name: myName, charImg: myChar, team: 'none', ready: false });
 
             db.ref(`rooms/${currentRoom}`).on('value', (snapshot) => {
                 const data = snapshot.val(); if(!data) return;
 
+                // 맵 동적 로딩
+                if(data.targetConfig) {
+                    globalTargets = data.targetConfig;
+                    let tempMap = JSON.parse(JSON.stringify(baseMapData));
+                    globalTargets.forEach(t => { tempMap[t.y][t.x] = t.id; });
+                    globalMapData = tempMap;
+                }
+
                 if(data.status === 'waiting') {
                     renderWaitingRoom(data.players);
                 } else if(data.status === 'playing' || data.status === 'round_end') {
-                    // 방장 관전 모드 대시보드 업데이트
                     if(isHost && myTeam === 'none') {
                         if(!document.getElementById('dashboard-screen').classList.contains('active')) switchScreen('dashboard-screen');
                         updateDashboard(data);
                     } else {
-                        // 일반 유저 게임 화면
                         let myTeamFinished = (myTeam !== 'none' && data.teams && data.teams[myTeam] && data.teams[myTeam].finished);
                         if(myTeamFinished || data.status === 'round_end') {
                             showRoundLounge(data);
@@ -431,57 +490,53 @@
                         }
                     }
                 } else if(data.status === 'game_over') {
-                    if(isHost && myTeam === 'none') updateDashboard(data); // 호스트도 엔딩 확인 가능하도록 대시보드 유지
+                    if(isHost && myTeam === 'none') updateDashboard(data);
                     else showFinalEnding(data);
                 }
             });
         }
 
-        // 다이내믹 팀 박스 렌더링
         function renderWaitingRoom(players) {
             const container = document.getElementById('dynamic-team-container');
             container.innerHTML = "";
             let teamStats = {};
+
             for(let i=0; i<hostTeamCount; i++) {
                 let tName = teamNames[i];
                 teamStats[tName] = 0;
-                let color = i % 2 === 0 ? '#ff007f' : '#00f0ff';
-                container.innerHTML += `<div class="team-box" id="team-${tName}" ondragover="allowDrop(event)" ondrop="drop(event, '${tName}')"><div class="team-title" style="color: ${color};">TEAM ${tName}</div></div>`;
+                let color = teamColors[i % teamColors.length];
+                container.innerHTML += `<div class="team-box" id="team-${tName}" ondragover="allowDrop(event)" ondrop="drop(event, '${tName}')" style="border-color: ${color};"><div class="team-title" style="color: ${color};">TEAM ${tName}</div></div>`;
             }
+
+            document.getElementById('team-none').innerHTML = `<div class="team-title" style="color: white;">👀 Waiting Area (Spectators)</div>`;
 
             let total = 0; let allReady = true;
             for(let id in players) {
                 total++;
                 if(!players[id].ready && players[id].team !== 'none') allReady = false; 
-                if(players[id].team !== 'none') {
-                    teamStats[players[id].team] = (teamStats[players[id].team] || 0) + 1;
-                }
+                if(players[id].team !== 'none') teamStats[players[id].team]++;
 
                 const p = players[id]; const div = document.createElement('div');
                 div.className = 'player-card'; div.draggable = (id === myId); div.id = id; div.ondragstart = drag;
                 div.innerHTML = `<img src="${p.charImg}" alt="char" onerror="this.style.display='none'"><span>${p.name} ${p.ready && p.team !== 'none' ? '✅' : ''}</span>`;
-                if(p.team === 'none') {
-                    document.getElementById('team-none').appendChild(div);
-                } else {
-                    document.getElementById(`team-${p.team}`).appendChild(div);
-                }
+                if(p.team === 'none') document.getElementById('team-none').appendChild(div);
+                else document.getElementById(`team-${p.team}`).appendChild(div);
             }
 
-            // 각 활성 팀마다 정확히 2명인지 검사
             let isValid = true;
             let activeTeamCount = 0;
             for(let i=0; i<hostTeamCount; i++) {
                 let c = teamStats[teamNames[i]];
                 if(c > 0) activeTeamCount++;
-                if(c !== 0 && c !== 2) isValid = false; // 팀에 사람이 있으면 무조건 2명이어야 함
+                if(c !== 0 && c !== 2) isValid = false; 
             }
-            if(activeTeamCount === 0) isValid = false; // 아예 팀이 없으면 불가
+            if(activeTeamCount === 0) isValid = false; 
 
             if(isHost) {
                 const startBtn = document.getElementById('start-game-btn');
                 startBtn.style.display = 'block';
                 if(isValid && allReady) {
-                    startBtn.disabled = false; startBtn.innerText = "START GAME"; startBtn.style.backgroundColor = "#ff007f";
+                    startBtn.disabled = false; startBtn.innerText = "START GAME 🚀"; startBtn.style.backgroundColor = "#ff007f";
                 } else {
                     startBtn.disabled = true; startBtn.style.backgroundColor = "gray";
                     if(!isValid) startBtn.innerText = "Need 2 players per active team!";
@@ -494,7 +549,10 @@
         function allowDrop(ev) { ev.preventDefault(); }
         function drop(ev, teamName) {
             ev.preventDefault(); myTeam = teamName;
-            db.ref(`rooms/${currentRoom}/players/${myId}`).update({ team: teamName });
+            if(teamName !== 'none') {
+                myTeamColor = teamColors[teamNames.indexOf(teamName) % teamColors.length];
+            } else { myTeamColor = "white"; }
+            db.ref(`rooms/${currentRoom}/players/${myId}`).update({ team: teamName, ready: false });
         }
 
         function toggleReady() {
@@ -504,6 +562,7 @@
         }
 
         function startGame() { startRound(1); }
+        function hostNextRound() { startRound(currentRound + 1); }
 
         function startRound(roundNum) {
             db.ref(`rooms/${currentRoom}`).once('value').then(snapshot => {
@@ -528,11 +587,10 @@
         }
 
         function getBuildingData(id) {
-            let t = targets.find(obj => obj.id === id);
+            let t = globalTargets.find(obj => obj.id === id);
             return t ? t : { emoji:'', name:'' };
         }
 
-        // 호스트 대시보드 렌더링
         function updateDashboard(data) {
             document.getElementById('dash-round-info').innerText = `Round ${data.round} / 4  (${data.status.toUpperCase()})`;
             document.getElementById('dash-timer').innerText = formatTime(Math.floor((Date.now() - data.startTime) / 1000));
@@ -543,27 +601,30 @@
             if(data.teams) {
                 for(let t in data.teams) {
                     let d = data.teams[t];
+                    let tColor = teamColors[teamNames.indexOf(t) % teamColors.length];
                     let statusColor = d.finished ? '#39ff14' : 'white';
                     let timeText = d.finished ? formatTime(d.currentRoundTime) : "Playing...";
                     
                     grid.innerHTML += `
-                        <div class="dash-card">
-                            <div class="dash-title">TEAM ${t}</div>
-                            <div class="dash-info" style="color: ${statusColor}">${timeText}</div>
-                            <div style="font-size:0.9rem;">Total: ${formatTime(d.totalTime || 0)}</div>
-                            <div class="dash-log">${d.chatLog ? d.chatLog.slice(-100) : ''}</div>
+                        <div class="dash-card" style="border-color: ${tColor};">
+                            <div class="dash-title" style="color: ${tColor};">TEAM ${t}</div>
+                            <div class="dash-info" style="color: ${statusColor}; background: black; padding: 5px; border-radius: 10px;">${timeText}</div>
+                            <div style="font-size:1rem; font-weight:bold; margin-bottom: 5px;">Total: ${formatTime(d.totalTime || 0)}</div>
+                            <div class="dash-log">${d.chatLog ? d.chatLog : ''}</div>
                         </div>
                     `;
                 }
             }
+            // Auto scroll all dash logs
+            document.querySelectorAll('.dash-log').forEach(el => el.scrollTop = el.scrollHeight);
 
             if(data.status === 'round_end' && data.round < 4) {
                 document.getElementById('dash-next-btn').style.display = 'block';
-                document.getElementById('dash-next-btn').innerText = "START NEXT ROUND";
-                document.getElementById('dash-next-btn').onclick = () => startRound(data.round + 1);
+                document.getElementById('dash-next-btn').innerText = "START NEXT ROUND 🚀";
+                document.getElementById('dash-next-btn').onclick = hostNextRound;
             } else if(data.status === 'game_over') {
                 document.getElementById('dash-next-btn').style.display = 'block';
-                document.getElementById('dash-next-btn').innerText = "FINISH GAME";
+                document.getElementById('dash-next-btn').innerText = "FINISH GAME 🏆";
                 document.getElementById('dash-next-btn').onclick = () => location.reload();
             } else {
                 document.getElementById('dash-next-btn').style.display = 'none';
@@ -580,7 +641,7 @@
             myTeamPlayers.sort((a,b) => a.id.localeCompare(b.id));
             let explorerData = null;
 
-            if(myTeam === 'none' || myTeamPlayers.length === 0) { return; } // Spectator handled by Dashboard
+            if(myTeam === 'none' || myTeamPlayers.length === 0) { return; } 
             
             if(myTeamPlayers.length > 1) {
                 if(currentRound % 2 !== 0) {
@@ -596,9 +657,8 @@
 
             const grid = document.getElementById('grid');
             document.querySelectorAll('.cell').forEach(e => e.remove());
-            const targetObj = targets[currentRound - 1];
+            const targetObj = globalTargets[currentRound - 1];
 
-            // 동적 검문소 세팅
             document.getElementById('tollgate-type-blank').style.display = 'none';
             document.getElementById('tollgate-type-combo').style.display = 'none';
             if(targetObj.pwdType === 'blank') {
@@ -617,15 +677,15 @@
                 for(let y=0; y<5; y++) {
                     for(let x=0; x<5; x++) {
                         let cell = document.createElement('div'); cell.className = 'cell'; cell.id = `cell-${x}-${y}`;
-                        if(mapData[y][x] === 0) cell.classList.add('road');
-                        if(mapData[y][x] === 3) { cell.innerText = '🪨'; cell.classList.add('obstacle-cell'); }
+                        if(globalMapData[y][x] === 0) cell.classList.add('road');
+                        if(globalMapData[y][x] === 3) { cell.innerText = '🪨'; cell.classList.add('obstacle-cell'); }
                         
-                        if([2,4,5,6].includes(mapData[y][x])) {
-                            let bData = getBuildingData(mapData[y][x]);
+                        if([2,4,5,6].includes(globalMapData[y][x])) {
+                            let bData = getBuildingData(globalMapData[y][x]);
                             cell.innerHTML = `<span style="font-size: 1.8rem;">${bData.emoji}</span><span class="map-label">${bData.name}</span>`;
                             cell.classList.add('building-cell');
                         }
-                        if(mapData[y][x] === 7) { 
+                        if(globalMapData[y][x] === 7) { 
                             cell.innerHTML = '<span style="font-size:1.8rem;">👮</span><span class="map-label">CHECKPOINT</span>'; 
                             cell.classList.add('tollgate-cell'); 
                         }
@@ -732,7 +792,7 @@
                 const pwdDisplay = document.getElementById('tollgate-password-display');
                 if(!localTeamData.tollgateCleared && localTeamData.charX === 2 && localTeamData.charY === 2) {
                     pwdDisplay.style.display = 'block';
-                    document.getElementById('secret-word').innerText = targets[currentRound-1].pwdGuide;
+                    document.getElementById('secret-word').innerText = globalTargets[currentRound-1].pwdGuide;
                 } else {
                     pwdDisplay.style.display = 'none';
                 }
@@ -742,13 +802,13 @@
         function sendWalkieQuestion() {
             const q1 = document.getElementById('chat-q-1').value;
             const q2 = document.getElementById('chat-q-2').value;
-            const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> ${q1} ${q2}</div>`;
+            const msg = `<div style="padding: 2px 0; border-bottom: 1px solid #ddd;"><span style="color:${myTeamColor}; text-shadow: 1px 1px black;">[Exp] ${myName}:</span> ${q1} ${q2}</div>`;
             let currentLog = (localTeamData && localTeamData.chatLog) ? localTeamData.chatLog : " ";
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + msg, lastSender: 'explorer' });
         }
 
         function sendMoveComplete() {
-            const msg = `<div style="padding: 2px 0;"><span style="color:#ff007f;">[Explorer] ${myName}:</span> ✅ Move complete! What's next?</div>`;
+            const msg = `<div style="padding: 2px 0; border-bottom: 1px solid #ddd;"><span style="color:${myTeamColor}; text-shadow: 1px 1px black;">[Exp] ${myName}:</span> ✅ Move complete! What's next?</div>`;
             let currentLog = (localTeamData && localTeamData.chatLog) ? localTeamData.chatLog : " ";
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + msg, lastSender: 'explorer' });
         }
@@ -757,14 +817,14 @@
             const a1 = document.getElementById('chat-a-1').value;
             const a2 = document.getElementById('chat-a-2').value;
             const moves = parseInt(a2); 
-            const msg = `<div style="padding: 2px 0;"><span style="color:#006064;">[Guide] ${myName}:</span> ${a1} ${a2}</div>`;
+            const msg = `<div style="padding: 2px 0; border-bottom: 1px solid #ddd;"><span style="color:#006064;">[Guide] ${myName}:</span> ${a1} ${a2}</div>`;
             let currentLog = (localTeamData && localTeamData.chatLog) ? localTeamData.chatLog : " ";
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + msg, movesLeft: moves, lastSender: 'guide' });
         }
 
         function sendArrivalSignal() {
             const msgText = document.getElementById('chat-arrival').value;
-            const msg = `<div style="padding: 2px 0;"><span style="color:#006064;">[Guide] ${myName}:</span> 📢 ${msgText}</div>`;
+            const msg = `<div style="padding: 2px 0; border-bottom: 1px solid #ddd;"><span style="color:#006064;">[Guide] ${myName}:</span> 📢 ${msgText}</div>`;
             let currentLog = (localTeamData && localTeamData.chatLog) ? localTeamData.chatLog : " ";
             db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + msg, lastSender: 'guide', arrivalSignaled: true });
         }
@@ -789,12 +849,12 @@
 
             let allowedCells = [0, 2, 4, 5, 6, 7];
 
-            if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && allowedCells.includes(mapData[ny][nx])) {
+            if(nx >= 0 && nx < 5 && ny >= 0 && ny < 5 && allowedCells.includes(globalMapData[ny][nx])) {
                 let newPath = localTeamData.path ? (localTeamData.path + `|${nx},${ny}`) : `${nx},${ny}`;
                 
-                if(mapData[ny][nx] === 7 && !localTeamData.tollgateCleared) {
+                if(globalMapData[ny][nx] === 7 && !localTeamData.tollgateCleared) {
                     db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 }).then(() => {
-                        myComboInput = []; // 콤보 초기화
+                        myComboInput = []; 
                         document.getElementById('combo-display').innerText = "";
                         document.getElementById('tollgate-modal').style.display = 'flex';
                     });
@@ -803,7 +863,7 @@
                 db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ charX: nx, charY: ny, charDir: nd, path: newPath, movesLeft: mLeft - 1 });
             } else {
                 let currentLog = localTeamData.chatLog || " ";
-                let errorMsg = `<div style="padding: 2px 0;"><span style="color:red; font-weight:bold;">⚠️ [System]:</span> Out of road!</div>`;
+                let errorMsg = `<div style="padding: 2px 0; border-bottom: 1px solid #ddd;"><span style="color:red; font-weight:bold;">⚠️ [System]:</span> Out of road!</div>`;
                 db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ chatLog: currentLog + errorMsg });
 
                 const sprite = document.getElementById('player-sprite');
@@ -815,7 +875,6 @@
             }
         }
 
-        // 콤보 입력 처리
         function addCombo(btnName) {
             const emojis = { 'forward': '⬆️', 'backward': '⬇️', 'left': '↩️', 'right': '↪️' };
             myComboInput.push(btnName);
@@ -823,7 +882,7 @@
         }
 
         function submitTollgate() {
-            const targetObj = targets[currentRound-1];
+            const targetObj = globalTargets[currentRound-1];
             let isCorrect = false;
 
             if(targetObj.pwdType === 'blank') {
@@ -843,7 +902,7 @@
                 db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ tollgateCleared: true });
             } else {
                 alert("Wrong password/combo! Ask the guide again.");
-                myComboInput = []; // 틀리면 초기화
+                myComboInput = [];
                 document.getElementById('combo-display').innerText = "";
                 document.getElementById('tollgate-input').value = "";
             }
@@ -852,7 +911,7 @@
         function checkWin() {
             if (myRole !== 'Explorer') return;
             if (!localTeamData) return;
-            const targetObj = targets[currentRound - 1];
+            const targetObj = globalTargets[currentRound - 1];
 
             if(localTeamData.charX === targetObj.x && localTeamData.charY === targetObj.y) {
                 if(!localTeamData.arrivalSignaled) {
@@ -862,10 +921,9 @@
                 let newTotalTime = (localTeamData.totalTime || 0) + roundTime;
                 db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ finished: true, currentRoundTime: roundTime, totalTime: newTotalTime }).then(() => { checkAllTeamsFinished(currentRoom); });
             } else {
-                // 오답 복구 시스템: 상태 초기화하여 다시 묻게 만듦
                 alert("Wrong place! The system reverted your status. Ask the Guide again!");
                 let currentLog = localTeamData.chatLog || " ";
-                let errorMsg = `<div style="padding: 2px 0;"><span style="color:red; font-weight:bold;">⚠️ [System]:</span> Wrong Destination!</div>`;
+                let errorMsg = `<div style="padding: 2px 0; border-bottom: 1px solid #ddd;"><span style="color:red; font-weight:bold;">⚠️ [System]:</span> Wrong Destination!</div>`;
                 db.ref(`rooms/${currentRoom}/teams/${myTeam}`).update({ 
                     arrivalSignaled: false,
                     lastSender: 'guide',
@@ -890,8 +948,9 @@
             if(myTeam !== 'none' && data.teams && data.teams[myTeam]) {
                 let myTime = data.teams[myTeam].currentRoundTime; document.getElementById('lounge-my-time').innerText = formatTime(myTime);
             }
+            // 방장(호스트)만이 관전 모드에서 [START NEXT ROUND]를 누름
             if(data.status === 'round_end') {
-                document.getElementById('lounge-status').innerText = "All teams have finished!";
+                document.getElementById('lounge-status').innerText = "Wait for the Host to start next round!";
             } else {
                 document.getElementById('lounge-status').innerText = "Waiting for other teams...";
             }
@@ -902,7 +961,8 @@
             let html = "<h3 style='color: white; font-size: 2rem; margin-top: 0;'>Final Time Records</h3>";
             for(let t in data.teams) {
                 if(data.teams[t].totalTime !== undefined) {
-                    html += `<p style="font-size:2rem; font-weight:bold; color:yellow; margin: 10px 0;">TEAM ${t}: ${formatTime(data.teams[t].totalTime)}</p>`;
+                    let tColor = teamColors[teamNames.indexOf(t) % teamColors.length];
+                    html += `<div style="font-size:2rem; font-weight:bold; color:${tColor}; margin: 10px 0; background:rgba(255,255,255,0.1); padding:10px; border-radius:10px;">TEAM ${t}: ${formatTime(data.teams[t].totalTime)}</div>`;
                 }
             }
             document.getElementById('ending-results').innerHTML = html;
